@@ -1,9 +1,11 @@
 #### repo for the manuscript:
 
 
-## Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis.
+## Parallel dynamics of bacterial genome reduction 
+## across independent transitions to endosymbiosis.
 
 
+![alt text](https://live.staticflickr.com/65535/49577967752_47f87a76bd_b.jpg)
 
 ![alt text](https://www.researchgate.net/publication/340411951/figure/fig3/AS:960059660054533@1605907468823/Transmission-electron-microphotograph-of-the-Pantoea-ananatis-strain-NN08200.jpg)
 
