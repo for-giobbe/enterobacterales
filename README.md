@@ -1,7 +1,7 @@
 #### repo for the manuscript:
 
 
-#### Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis.
+#### "Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis"
 
 
 ![alt text](https://upload.wikimedia.org/wikipedia/commons/7/7c/Journal.pbio.0050126.g001.png)
