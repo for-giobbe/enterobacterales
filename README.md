@@ -19,9 +19,9 @@ Our analyses contribute to the coming of age of the theory of genome evolution i
 ---
 
 
-In this repo there are two files which will guide others throughout analyses_
+In this repo there are two files which will guide others throughout analyses:
 
-- a [intellegible .html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.html) markdown file - more acessible
-- a [nonknitted mardown](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.Rmd) markdown file - to rerun analyses
+- a [.html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.html) markdown file - easily acessible
+- a [.Rmd](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.Rmd) markdown file - to rerun analyses
 
 Furthermore, a [zenodo]() repository is available for large intermediate files.
