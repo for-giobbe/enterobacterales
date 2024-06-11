@@ -1,0 +1,2119 @@
+
+#### title: "Parallel dynamics of gene content evolution across independent endosymbiont lineages."
+
+#### authors:
+  - Giobbe Forni
+  - Jacopo Martelossi
+  - Dario Pistone
+  - Benoit Morell
+  - Claudio Bandi
+  - Matteo Montagna
+  
+#### date: "`r format(Sys.time(), '%d %B %Y')`"
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+<br />
+<br />
+
+# __BACKGROUND:__
+
+Abstract: The establishment of symbiosis dramatically alters the evolution of the associated species, making symbiotic systems ideal models for studying the impact of lifestyle changes on genomes. Here, we focused on Enterobacterales, a large and ancient bacterial lineage that includes endosymbionts with diverse host associations, ranging from gut inhabitants to intracellular environments, and from horizontal to vertical transmission. Leveraging over two hundred genomes, along with cutting-edge single-copy gene concatenation and multi-copy gene family approaches, we inferred a robust phylogenetic framework that supports eleven independent transitions to endosymbiosis. Inferences on patterns of genome evolution confirm previous hypotheses about the processes underlying genome reduction: a substantial spike in gene loss always occurs simultaneously with the establishment of endosymbiosis, while a reduction in gene acquisition mechanisms is associated with the subsequent genome erosion. Furthermore, gene family loss frequencies were correlated across independent endosymbiotic clades; genes with more conserved functions and stronger constraints on sequence evolution are lost less frequently, suggesting that differences in gene essentiality and dispensability drive the observed parallelism. Our analyses contribute to the coming of age of the theory of genome evolution in symbiotic associations and provide novel insights into the importance of recombination as an opposing force against genome erosion.
+
+<br />
+<br />
+
+# __1 - PHYLOGENETIC INFERENCES:__
+
+<br />
+<br />
+
+##### __code for concatenation-based species tree inferences:__
+
+```{concatenation based inferences, eval = FALSE}
+iqtree2 -s min95%sp_p.ol.all_parts.aln -m TESTMERGE --rcluster 10 -spp min95%sp_p.ol.all_parts.prt -mset JTT,WAG,LG -bb 1000 -mrate G,R,E -T 32 --prefix all_parts_site_homogeneous
+
+iqtree2 -s min95%sp_p.ol.good_part.aln -m TESTMERGE --rcluster 10 -spp min95%sp_p.ol.good_part.prt -mset JTT,WAG,LG -bb 1000 -mrate G,R,E -T 32 --prefix good_part_site_homogeneous 
+
+iqtree2 -s min95%sp_p.ol.all_parts.aln -m TESTMERGE -mset JTT,WAG,LG,LG4M,LG4X,CF4,C10,C20,C30,C40,C50,C60 -madd JTT+C10,JTT+C20,JTT+C30,JTT+C40,JTT+C50,JTT+C60,WAG+C10,WAG+C20,WAG+C30,WAG+C40,WAG+C50,WAG+C60,LG+C10,LG+C20,LG+C30,LG+C40,LG+C50,LG+C60 -bb 1000 -T 32 --prefix all_parts_site_heterogeneous
+
+iqtree2 -s min95%sp_p.ol.good_part.aln -m TESTMERGE -mset JTT,WAG,LG,LG4M,LG4X,CF4,C10,C20,C30,C40,C50,C60 -madd JTT+C10,JTT+C20,JTT+C30,JTT+C40,JTT+C50,JTT+C60,WAG+C10,WAG+C20,WAG+C30,WAG+C40,WAG+C50,WAG+C60,LG+C10,LG+C20,LG+C30,LG+C40,LG+C50,LG+C60 -bb 1000 -T 32 --prefix good_part_site_heterogeneous
+
+iqtree2 -s min95%sp_p.ol.RS4.all_parts.aln -m TESTMERGE -rcluster 10 -spp min95%sp_p.ol.RS4.all_parts.prt -mset JC,F81,GTR -bb 1000 -mrate G,R,E -T 16 --prefix SR4_all_parts_site_homogeneous
+
+iqtree2 -s min95%sp_p.ol.RS4.good_part.aln -m TESTMERGE -rcluster 10 -spp min95%sp_p.ol.RS4.good_part.prt -mset JC,F81,GTR -bb 1000 -mrate G,R,E -T 16 --prefix SR4_good_part_site_homogeneous
+
+iqtree2 -s min95%sp_p.ol.RS4.all_parts.aln -m TEST -mset JC,F81,GTR -mdef SR4_profileModels_IQtree.nxs -madd SR4C10JC,SR4C20JC,SR4C30JC,SR4C40JC,SR4C50JC,SR4C60JC,SR4C10F81,SR4C20F81,SR4C30F81,SR4C40F81,SR4C50F81,SR4C60F81,SR4C10GTR,SR4C20GTR,SR4C30GTR,SR4C40GTR,SR4C50GTR,SR4C60GTR -bb 1000 -mrate G,R,E -T 32 --prefix SR4_all_parts_site_heterogeneous
+
+iqtree2 -s min95%sp_p.ol.RS4.good_part.aln -m TEST -mset JC,F81,GTR -mdef SR4_profileModels_IQtree.nxs -madd SR4C10JC,SR4C20JC,SR4C30JC,SR4C40JC,SR4C50JC,SR4C60JC,SR4C10F81,SR4C20F81,SR4C30F81,SR4C40F81,SR4C50F81,SR4C60F81,SR4C10GTR,SR4C20GTR,SR4C30GTR,SR4C40GTR,SR4C50GTR,SR4C60GTR -bb 1000 -mrate G,R,E -T 32 --prefix SR4_good_part_site_heterogeneous
+```
+
+<br />
+<br />
+
+##### __code for gene families tree inferences:__
+
+We build up gene families trees for each OG using two different dataset and the ParGene pipeline: (i) aa sequences for all gene families, (ii) SR4-recoded aa sequences for all gene families. the "$Aln_dir" point to the directory were are stored original alignments and the recoded ones. "$out" is the out directory.
+
+```{gene families trees inferences, eval = FALSE}
+pargenes.py -a "$Aln_dir" -o "$out" -c 16 -d aa -m --modeltest-criteria BIC --modeltest-perjob-cores 4
+```
+
+<br />
+<br />
+
+##### __code for gene families-based species tree inferences:__
+
+We performed three gene families based tree inferences (i) all gene families (aa alignments and trees); (ii) gene families that pass the iqtree stationary/homogeneity test (aa alignments and trees) and (iii) all gene families but SR4-recoded (SR4-recoded alignments and trees). The GeneRax comand was the same for all analyses changing only the family file ("$Family_file" variable).
+
+```{gene families based species tree inferences, eval = FALSE}
+generax --families "$Family_file" --si-strategy HYBRID --species-tree MiniNJ --rec-model UndatedDTL --per-family-rates --prune-species-tree --si-estimate-bl --si-quartet-support --prefix "$out"
+```
+
+<br />
+<br />
+
+##### __code for gene trees corrections and reconciliations:__
+
+The species trees resulting from SpeciesRax analyses were re-rooted to correct the root position and all gene trees were re-corrected for 3 rounds and reconciled infering per-species DTL rates
+
+```{gene families based inferences, eval = FALSE}
+generax -f "$Family_file" -s "$tree" --per-species-rates --strategy SPR -p "$out" --max-spr-radius 3
+```
+
+<br />
+<br />
+
+##### __R library requirements:__
+
+```{r library requirements, message=FALSE, warning=FALSE}
+library(phytools)
+library(phangorn)
+library(ggtree)
+library(ggplot2)
+library(reshape2)
+library(TreeDist)
+library(ComplexHeatmap)
+library(geiger)
+library(ape)
+library(gridExtra)
+library(phylotools)
+library(ggfortify)
+library(ggExtra)
+library(treeio)
+library(tidyr)
+library(tidytree)
+library(plotly)
+library(ggsignif)
+library(ggpubr)
+library(stringr)
+library(forcats)
+library(dplyr)
+library(cowplot)
+library(ggrepel)
+library(extrafont)
+library(corrplot)
+library(rstatix)
+library(ggcorrplot)
+library(ggwordcloud)
+library(patchwork)
+```
+
+<br />
+<br />
+
+# __2 - TOPOLOGY ANALYSES:__
+
+Here we compare the topologies we found
+
+<br />
+<br />
+
+##### __import data pt. 1:__
+
+Here we import the different phylogenetic inferences along with the tips tratis:
+
+```{r import data pt. 1}
+concat_all_hom_aa <- read.tree("phylogenetic_resolutions/concatenation_all_genes_site_homogeneous_aa.nwk")
+concat_all_het_aa <- read.tree("phylogenetic_resolutions/concatenation_all_genes_site_heterogeneous_aa.nwk")
+
+concat_hom_hom_aa <- read.tree("phylogenetic_resolutions/concatenation_homogeneous_genes_site_homogeneous_aa.nwk")
+concat_hom_het_aa <- read.tree("phylogenetic_resolutions/concatenation_homogeneous_genes_site_heterogeneous_aa.nwk")
+
+concat_all_hom_SR4 <- read.tree("phylogenetic_resolutions/concatenation_all_genes_site_homogeneous_SR4.nwk")
+concat_all_het_SR4 <- read.tree("phylogenetic_resolutions/concatenation_all_genes_site_heterogeneous_SR4.nwk")
+
+concat_hom_hom_SR4 <- read.tree("phylogenetic_resolutions/concatenation_homogeneous_genes_site_homogeneous_SR4.nwk")
+concat_hom_het_SR4 <- read.tree("phylogenetic_resolutions/concatenation_homogeneous_genes_site_heterogeneous_SR4.nwk")
+
+genfam_all_aa <- read.tree("phylogenetic_resolutions/SpeciesRax_all_genes_aa.nwk")
+genfam_hom_aa <- read.tree("phylogenetic_resolutions/SpeciesRax_homogeneous_genes_aa.nwk")
+genfam_all_SR4 <- read.tree("phylogenetic_resolutions/SpeciesRax_all_genes_SR4.nwk")
+
+genfam_all_SR4 <- drop.tip(genfam_all_SR4, "NZ-LG025083.1")
+
+annot <- read.csv("sp_annotations.csv", header=T)
+sp_traits <- read.csv("sp_traits.csv", header=T)
+
+row.names(annot) <- annot$species
+row.names(sp_traits) <- sp_traits$species
+
+info <- merge(annot, sp_traits, by = "row.names")
+row.names(info) <- info$Row.names
+
+info <- info[,-c(1,2)]
+```
+
+<br />
+<br />
+
+##### __Fig. S2 - visualizing differences among inferences:__
+
+A more detailed way to take a look at the differences among our inferences by plotting them side by side.
+
+```{r cophylo, fig.width=9, fig.height=13, message=FALSE, warning=FALSE}
+pdf(file="FigS2.pdf", width=25, height=25)
+
+ref_tree <- genfam_all_SR4
+ref_tree <- drop.tip(ref_tree,c("NZ-CP028926.1","NZ-CP009610.1"))                               # drop outgroups
+ref_tree <- reroot(ref_tree,which((ref_tree$tip.label == "NZ-CP050969.1") == "TRUE"))           # reroot on Plesiomonas shigelloides
+ref_tree$tip.label <- gsub("\\.[0-9]", "",ref_tree$tip.label )
+ref_tree$edge.length<-NULL
+
+other_tree <- concat_all_het_SR4
+other_tree <- drop.tip(other_tree,c("NZ-CP028926.1","NZ-CP009610.1"))                           # drop outgroups
+other_tree <- reroot(other_tree,which((other_tree$tip.label == "NZ-CP050969.1") == "TRUE"))     # reroot on Plesiomonas shigelloides
+other_tree$tip.label <- gsub("\\.[0-9]", "",other_tree$tip.label )
+other_tree$edge.length<-NULL
+
+info <- merge(annot, sp_traits, by = "row.names")
+row.names(info) <- info$Row.names
+
+info <- info[match(ref_tree$tip.label, info$species.y),]
+ref_tree$tip.label <- info$sp
+
+info <- info[match(other_tree$tip.label, info$species.y),]
+other_tree$tip.label <- info$sp
+
+vs<-cophylo(ref_tree,other_tree,rotate=T)
+
+plot(vs,link.lwd=0.5,link.lty="solid",
+     link.col=make.transparent("darkgray ",0.75),fsize=0.5)
+title(main="gene families / all gene families / SR4 recoding (11) VS concatenation / all single copy genes / mixture model / SR4 recoding (04)", line = -1, cex.main = 2)
+
+nodelabels.cophylo(round(as.numeric(ref_tree$node.label),2), cex=0.5, which="left", frame = "none")
+nodelabels.cophylo(as.numeric(other_tree$node.label), cex=0.5, which="right", frame = "none")
+
+info <- merge(annot, sp_traits, by = "row.names")
+info <- info[match(ref_tree$tip.label, info$sp),]
+state <- setNames(as.factor(info$state),info$sp)
+cols<-setNames(c("orange","#c0ecf5"),levels(state))
+tiplabels.cophylo(pie=to.matrix(state[vs$trees[[1]]$tip.label],levels(state)),
+    piecol=cols,cex=0.1,which="left")
+info <- merge(annot, sp_traits, by = "row.names")
+info <- info[match(other_tree$tip.label, info$sp),]
+state <- setNames(as.factor(info$state),info$sp)
+tiplabels.cophylo(pie=to.matrix(state[vs$trees[[2]]$tip.label],levels(state)),
+    piecol=cols,cex=0.1,which="right")
+
+
+dev.off() 
+```
+
+<br />
+<br />
+
+##### __export trees for subsequent analyses:__
+  
+```{r export trees, eval = FALSE}
+tree <- genfam_all_SR4
+tree <- reroot(tree,which((tree$tip.label == "NZ-CP050969.1") == "TRUE"))             # reroot on Plesiomonas shigelloides
+write.tree(tree, "./DLT_analyses_SpeciesRax_all_genes_SR4/DLT_analyses_SpeciesRax_all_genes_SR4_starting_tree.nwk")
+
+tree <- concat_all_het_SR4
+tree <- reroot(tree,which((tree$tip.label == "NZ-CP050969.1") == "TRUE"))             # reroot on Plesiomonas shigelloides
+write.tree(tree, "./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4_starting_tree.nwk")
+```
+
+<br />
+<br />
+
+# __3 - ANALYSES ON "BEST" TOPOLOGY:__
+
+<br />
+<br />
+
+##### __D/L/T of gene families on the "gene families + all genes + SR4" tree:__
+
+```{gene families D/L/T, eval = FALSE}
+generax --families "$Family_file" --si-strategy HYBRID --species-tree MiniNJ --rec-model UndatedDTL --per-family-rates --prune-species-tree --si-estimate-bl --si-quartet-support --prefix "$out"
+```
+
+```{rename GeneRax nodes, eval = FALSE}
+n=1; while read line; do if echo $line | grep -q Node; then ((n++)); ref=$(echo $line | awk '{print $1}'); echo $ref s$n; fi; done < counts.txt > conversion.txt
+cp DLT_tree.newick DLT_tree_conv.newick; while read line; do one=$(echo $line | awk '{print $1}'); two=$(echo $line | awk '{print $2}'); gsed -i "s/$one/$two/g;" DLT_tree_conv.newick; done < conversion.txt
+cp counts.txt counts_conv.txt; while read line; do one=$(echo $line | awk '{print $1}'); two=$(echo $line | awk '{print $2}'); gsed -i "s/$one/$two/g;" counts_conv.txt; done < conversion.txt 
+cp rates.txt rates_conv.txt; while read line; do one=$(echo $line | awk '{print $1}'); two=$(echo $line | awk '{print $2}'); gsed -i "s/$one/$two/g;" rates_conv.txt; done < conversion.txt
+for file in *speciesEventCounts.txt; do while read line; do one=$(echo $line | awk '{print $1}'); two=$(echo $line | awk '{print $2}'); gsed -i "s/$one/$two/g;" $file; done < conversion.txt; done
+```
+
+<br />
+<br />
+
+##### __data wrangling pt. 1a:__
+
+```{r data wrangling pt. 1a, warning=FALSE}
+
+node_annotation = read.table("DLT_analyses_SpeciesRax_all_genes_SR4/node_annotation.tsv",
+                             sep="\t",header=T)   #Path to node annotation
+
+rates = read.table("DLT_analyses_SpeciesRax_all_genes_SR4/rates_conv.txt",
+                   sep=" ",header=F)    #Path to per_species_rates
+colnames(rates) <- c("node","duplication_rate","loss_rate","transfer_rate")
+counts = read.table("DLT_analyses_SpeciesRax_all_genes_SR4/counts_conv.txt",
+                    sep=" ",header=F)  #Path to per_species_counts
+colnames(counts) <- c("node","S","SL","D","T","TL")
+counts$S <- gsub("S=", "", counts$S)
+counts$SL <- gsub("SL=", "", counts$SL)
+counts$D <- gsub("D=", "", counts$D)
+counts$T <- gsub("T=", "", counts$T)
+counts$TL <- gsub("TL=", "", counts$TL)
+
+tmp  <- left_join(node_annotation, rates, by = 'node')
+data  <- left_join(tmp, counts, by = 'node')
+```
+
+<br />
+<br />
+
+##### __Fig. S3 - contingent losses across different endosymbiont lineages:__
+
+```{r Fig. S3, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+timeline <-  read.table("DLT_analyses_SpeciesRax_all_genes_SR4/lineages.tsv",sep="\t",header=T) 
+
+timeline  <- left_join(timeline, data, by = 'node')
+
+timeline <- timeline %>%
+  group_by(coordinate, origin.x) %>% 
+  summarise_at(vars("loss_rate"), mean)
+
+tmp <- timeline %>%
+  mutate(name2=origin.x)
+
+FigS3 <- tmp %>%
+  ggplot( aes(x=coordinate, y=loss_rate)) +
+  geom_line( data=tmp %>% dplyr::select(-origin.x), aes(group=name2), color="lightgray", size=0.55, alpha=0.5) +
+  geom_line( aes(color=origin.x), color="orange", size=1 ) + 
+  theme(
+      legend.position="none",
+      plot.title = element_text(size=14),
+      panel.grid = element_blank()
+    ) + theme_bw() + facet_wrap(~origin.x, nrow=3) + geom_vline(xintercept = 0, linetype="dotted",size=.5) +
+    theme(strip.background =element_rect(fill="white")) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) +
+  labs(x = "branch") + labs(y = "mean loss rate")
+
+
+ggsave("FigS3.pdf", FigS3, width = 6, height = 6)
+
+FigS3
+```
+
+<br />
+<br />
+
+##### __Fig. 2b - contingent gene losses overall:__
+
+```{r Fig. 2b, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+timeline <-  read.table("DLT_analyses_SpeciesRax_all_genes_SR4/lineages.tsv",sep="\t",header=T) 
+
+timeline  <- left_join(timeline, data, by = 'node')
+
+timeline <- timeline %>%
+  group_by(coordinate, origin.x) %>% 
+  summarise_at(vars("loss_rate"), mean)
+
+median(subset(timeline, coordinate == 0)$loss_rate)
+sd(subset(timeline, coordinate == 0)$loss_rate)
+median(subset(timeline, coordinate != 0)$loss_rate)
+sd(subset(timeline, coordinate != 0)$loss_rate)
+
+median(subset(timeline, coordinate == 0)$loss_rate)/median(subset(timeline, coordinate != 0)$loss_rate)
+sd(subset(timeline, coordinate == 0)$loss_rate)/mean(subset(timeline, coordinate != 0)$loss_rate)
+
+tmp <- timeline %>%
+  mutate(name2=origin.x)
+
+Fig2b <- ggplot(data=tmp, aes(x=coordinate, y=loss_rate, colour=origin)) + 
+  xlab("") + theme_bw() + theme(text = element_text(size = 10)) + 
+  geom_smooth(xintercept=-1, linetype="dashed", colour = "orange", size=1, alpha=0.2, colour=timeline$origin) +
+  theme(legend.position="none", plot.title = element_text(size=14)) + 
+  theme_bw() + theme(axis.title.x=element_blank()) + geom_vline(xintercept = 0, linetype="dotted",size=.5) +
+  theme(strip.background = element_rect(fill="white")) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + labs(x = "branch") + labs(y = "gene loss rate") + labs(x = "branch")
+```
+
+<br />
+<br />
+
+##### __Fig. 2a + 3a + 3c - DTL rates on the phylogeny:__
+
+```{r Fig. 2a 3a 3c, fig.width=12, fig.height=18, message=FALSE, warning=FALSE}
+tree <-  read.tree("DLT_analyses_SpeciesRax_all_genes_SR4/DLT_tree_conv.newick") #Path to specie tree with node labels
+
+tree <- drop.tip(tree,c("NZ-CP028926.1","NZ-CP009610.1"))           # drop outgroups
+data <- subset(data, node != "NZ-CP028926.1")
+data <- subset(data, node != "NZ-CP009610.1")
+data <- subset(data, node != "s209")
+data <- subset(data, node != "s2")
+
+#Create two dataframes for internal nodes and tips and order them based on the tree
+data_node = data[grepl('^s|^Root', data$node),]
+toDrop = rownames(data_node)
+data_tip = data[!(row.names(data) %in% toDrop),]
+data_node = data_node %>% arrange(factor(node, levels = tree$node.label))
+data_tip = data_tip %>% arrange(factor(node, levels = tree$tip.label))
+#Add node number
+data_node$node = 1:tree$Nnode+Ntip(tree)
+data_tip$node = 1:Ntip(tree)
+#Merge the two dataframes
+df = rbind(data_node,data_tip)
+#Merge phylogenetic tree and data
+tree2 <- full_join(tree, df, by = 'node')
+#write out a nexus file with all annotations
+write.beast(tree2,"DLT_analyses_SpeciesRax_all_genes_SR4/Enterobacteriales_annotated_tree.nxs")
+#read the nexus file
+beast_tree=read.beast("DLT_analyses_SpeciesRax_all_genes_SR4/Enterobacteriales_annotated_tree.nxs")
+
+#Plot the loss tree
+Fig2a <- ggtree(beast_tree, aes(color=as.numeric(loss_rate)), branch.length="none", size = 1, layout="fan") +
+  scale_color_gradientn(colours=c("gray95", 'black')) +
+  theme(legend.position = 'bottom') + ggtitle("loss rates") +
+  geom_point2(aes(subset=(label=="s96")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s96")), label="A", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="AP012551.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="AP012551.1")), label="B", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCF-012026695.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCF-012026695.1")), label="C", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s156")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s156")), label="D", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s153")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s153")), label="E1", size=2, color='white', fontface = "bold") +
+    geom_point2(aes(subset=(label=="NZ-CP006568.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="NZ-CP006568.1")), label="E2", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s142")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s142")), label="F", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s28")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s28")), label="G", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCA-001457715.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCA-001457715.1")), label="H", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s181")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s181")), label="I", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s192")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s192")), label="L", size=2, color='white', fontface = "bold")
+ 
+
+#Plot the duplication tree
+Fig3a <- ggtree(beast_tree, aes(color=as.numeric(duplication_rate)),branch.length="none", size = 1, layout="fan") +
+  scale_color_gradientn(colours=c("gray95", 'black')) +
+  theme(legend.position = 'bottom') + ggtitle("duplication rates") +
+   geom_point2(aes(subset=(label=="s96")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s96")), label="A", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="AP012551.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="AP012551.1")), label="B", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCF-012026695.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCF-012026695.1")), label="C", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s156")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s156")), label="D", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s153")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s153")), label="E1", size=2, color='white', fontface = "bold") +
+    geom_point2(aes(subset=(label=="NZ-CP006568.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="NZ-CP006568.1")), label="E2", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s142")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s142")), label="F", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s28")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s28")), label="G", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCA-001457715.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCA-001457715.1")), label="H", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s181")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s181")), label="I", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s192")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s192")), label="L", size=2, color='white', fontface = "bold")
+
+#Plot the transfer tree
+Fig3c <- ggtree(beast_tree, aes(color=as.numeric(transfer_rate)),branch.length="none", size = 1, layout="fan") +
+  scale_color_gradientn(colours=c("gray95", 'black')) +
+  theme(legend.position = 'bottom') + ggtitle("transfer rates") +
+  geom_point2(aes(subset=(label=="s96")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s96")), label="A", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="AP012551.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="AP012551.1")), label="B", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCF-012026695.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCF-012026695.1")), label="C", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s156")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s156")), label="D", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s153")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s153")), label="E1", size=2, color='white', fontface = "bold") +
+    geom_point2(aes(subset=(label=="NZ-CP006568.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="NZ-CP006568.1")), label="E2", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s142")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s142")), label="F", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s28")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s28")), label="G", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCA-001457715.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCA-001457715.1")), label="H", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s181")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s181")), label="I", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s192")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s192")), label="L", size=2, color='white', fontface = "bold")
+```
+
+<br />
+<br />
+
+##### __Fig. 2c + 3b + 3d - DTL rates differences between symbiont and free-living branches:__
+
+NB: endosymbiosis-enstablishment branches are not included here.
+
+```{r Fig. 2c 3b 3d, fig.width=12, fig.height=12, warning=FALSE}
+all_branches_events <- data %>% filter(! str_detect(state, "EST"))
+
+all_branches_events$loss_rate <- as.numeric(all_branches_events$loss_rate)
+all_branches_events$duplication_rate <- as.numeric(all_branches_events$duplication_rate)
+all_branches_events$transfer_rate <- as.numeric(all_branches_events$transfer_rate)
+
+state <- ""
+levels(state) <- c("endosymbionts","free-living")
+cols<-setNames(c("orange","#c0ecf5"),levels(state))
+
+all_branches_events$state[all_branches_events$state == "E"] <- "endosymbionts"
+all_branches_events$state[all_branches_events$state == "N"] <- "free-living"
+
+shapiro.test(all_branches_events$loss_rate)
+p <- ks.test(all_branches_events$loss_rate[all_branches_events$state == "endosymbionts"],all_branches_events$loss_rate[all_branches_events$state == "free-living"],alternative="less")$p.value
+Fig2c <- ggplot(all_branches_events, aes(y=loss_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("loss rates p=",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(axis.title.x = element_blank()) + labs(y = "gene loss rates") + theme(plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim=c(0, .5))
+
+median(subset(all_branches_events, state == "free-living")$loss_rate)
+sd(subset(all_branches_events, state == "free-living")$loss_rate)
+median(subset(all_branches_events, state != "free-living")$loss_rate)
+sd(subset(all_branches_events, state != "free-living")$loss_rate)
+
+shapiro.test(all_branches_events$duplication_rate)
+p <- ks.test(all_branches_events$duplication_rate[all_branches_events$state == "endosymbionts"],all_branches_events$duplication_rate[all_branches_events$state == "free-living"],alternative="greater")$p.value
+Fig3b <- ggplot(all_branches_events, aes(y=duplication_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("duplication rates p=",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(axis.title.x = element_blank()) + labs(y = "gene duplication rates") + theme(plot.title = element_text(size = 10)) + coord_cartesian(ylim=c(0, .05))
+
+median(subset(all_branches_events, state == "free-living")$duplication_rate)
+sd(subset(all_branches_events, state == "free-living")$duplication_rate)
+median(subset(all_branches_events, state != "free-living")$duplication_rate)
+sd(subset(all_branches_events, state != "free-living")$duplication_rate)
+
+shapiro.test(all_branches_events$transfer_rate)
+p <- ks.test(all_branches_events$transfer_rate[all_branches_events$state == "endosymbionts"],all_branches_events$transfer_rate[all_branches_events$state == "free-living"],alternative="greater")$p.value
+Fig3d <- ggplot(all_branches_events, aes(y=transfer_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("transfer rates p= ",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(axis.title.x = element_blank()) + labs(y = "gene transfer rates") + theme(plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim=c(0, .5))
+
+median(subset(all_branches_events, state == "free-living")$transfer_rate)
+sd(subset(all_branches_events, state == "free-living")$transfer_rate)
+median(subset(all_branches_events, state != "free-living")$transfer_rate)
+sd(subset(all_branches_events, state != "free-living")$transfer_rate)
+```
+
+<br />
+<br />
+
+##### __wrapping up Fig. 2 - losses:__
+
+```{r Fig. 2, fig.width=12, fig.height=8, message=FALSE, warning=FALSE}
+Fig2tmp <- plot_grid(Fig2b,Fig2c,
+                     ncol = 1,
+                     axis = "lr", 
+                     align = "hv",
+                     labels = c("B","C"))
+
+Fig2 <- plot_grid(Fig2a,Fig2tmp,
+                     ncol = 2,
+                     axis = "tr", 
+                     labels = c("A",""))
+
+ggsave("Fig2.pdf", Fig2, width = 12, height = 8)
+
+Fig2
+```
+
+<br />
+<br />
+
+##### __wrapping up Fig. 3 - transfer and duplication:__
+
+```{r Fig. 3, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+
+Fig3tmp1 <- plot_grid(Fig3a,Fig3c,
+                     ncol = 1,
+                     axis = "lr", 
+                     align = "hv",
+                     labels = c("A","C"))
+
+Fig3tmp2 <- plot_grid(Fig3b,Fig3d,
+                     ncol = 1,
+                     axis = "lr", 
+                     align = "hv",
+                     labels = c("B","D"))
+
+Fig3 <- plot_grid(Fig3tmp1,Fig3tmp2,
+                  ncol = 2,
+                  axis = "lr", 
+                  align = "hv")
+
+ggsave("Fig3.pdf", Fig3, width = 12, height = 12)
+
+Fig3
+```
+
+<br />
+<br />
+
+##### __Fig. S4 - DTL disparity across different endosymbiont lineages and association strength:__
+
+NB: endosymbiosis-enstablishment branches are not included here.
+
+```{r Fig. S4 part 1, fig.width=12, fig.height=12, warning=FALSE}
+all_branches_events <- data %>% filter(! str_detect(state, "EST"))
+
+all_branches_events$loss_rate <- as.numeric(all_branches_events$loss_rate)
+all_branches_events$duplication_rate <- as.numeric(all_branches_events$duplication_rate)
+all_branches_events$transfer_rate <- as.numeric(all_branches_events$transfer_rate)
+
+all_branches_events$strength[all_branches_events$strength == "0"] <- "free-living"
+all_branches_events$strength[all_branches_events$strength == "1"] <- "strict"
+all_branches_events$strength[all_branches_events$strength == "2"] <- "loose"
+all_branches_events$strength[all_branches_events$strength == "1/2"] <- "mixed"
+
+levels(state) <- c("free-living",
+                   "strict",
+                   "loose",
+                   "mixed")
+
+cols<-setNames(c("#c0ecf5","orange","orange","orange"),levels(state))
+
+median(subset(all_branches_events, strength == "free-living")$loss_rate)
+sd(subset(all_branches_events, strength == "free-living")$loss_rate)
+median(subset(all_branches_events, strength != "free-living")$loss_rate)
+sd(subset(all_branches_events, strength != "free-living")$loss_rate)
+
+median(subset(all_branches_events, strength == "strict")$loss_rate)
+sd(subset(all_branches_events, strength == "strict")$loss_rate)
+median(subset(all_branches_events, strength == "mixed")$loss_rate)
+sd(subset(all_branches_events, strength == "mixed")$loss_rate)
+median(subset(all_branches_events, strength == "loose")$loss_rate)
+sd(subset(all_branches_events, strength == "loose")$loss_rate)
+
+FigS4a <- ggplot(all_branches_events, aes(y=loss_rate, x=strength, fill=strength)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene loss rates") + theme(plot.title = element_text(size = 10)) + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "free-living", method = "wilcox.test", hjust = 2) +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  geom_hline(yintercept=median(all_branches_events$loss_rate[all_branches_events$strength == "free-living"]), linetype="dashed", color = "black", size=0.5) + coord_flip() 
+
+median(subset(all_branches_events, strength == "free-living")$transfer_rate)
+sd(subset(all_branches_events, strength == "free-living")$transfer_rate)
+median(subset(all_branches_events, strength != "free-living")$transfer_rate)
+sd(subset(all_branches_events, strength != "free-living")$transfer_rate)
+
+median(subset(all_branches_events, strength == "strict")$transfer_rate)
+sd(subset(all_branches_events, strength == "strict")$transfer_rate)
+median(subset(all_branches_events, strength == "mixed")$transfer_rate)
+sd(subset(all_branches_events, strength == "mixed")$transfer_rate)
+median(subset(all_branches_events, strength == "loose")$transfer_rate)
+sd(subset(all_branches_events, strength == "loose")$transfer_rate)
+
+FigS4b <- ggplot(all_branches_events, aes(y=transfer_rate, x=strength, fill=strength)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene transfer rates") + theme(plot.title = element_text(size = 10)) + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "free-living", method = "wilcox.test", hjust = 2) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  geom_hline(yintercept=median(all_branches_events$transfer_rate[all_branches_events$strength == "free-living"]), linetype="dashed", color = "black", size=0.5) + coord_flip()
+
+median(subset(all_branches_events, strength == "free-living")$duplication_rate)
+sd(subset(all_branches_events, strength == "free-living")$duplication_rate)
+median(subset(all_branches_events, strength != "free-living")$duplication_rate)
+sd(subset(all_branches_events, strength != "free-living")$duplication_rate)
+
+median(subset(all_branches_events, strength == "strict")$duplication_rate)
+sd(subset(all_branches_events, strength == "strict")$duplication_rate)
+median(subset(all_branches_events, strength == "mixed")$duplication_rate)
+sd(subset(all_branches_events, strength == "mixed")$duplication_rate)
+median(subset(all_branches_events, strength == "loose")$duplication_rate)
+sd(subset(all_branches_events, strength == "loose")$duplication_rate)
+
+FigS4c <- ggplot(all_branches_events, aes(y=duplication_rate, x=strength, fill=strength)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene duplication rates (square root transformed)") + theme(plot.title = element_text(size = 10)) + scale_y_continuous(trans='sqrt') + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "free-living", method = "wilcox.test", hjust = 2) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  geom_hline(yintercept=median(all_branches_events$duplication_rate[all_branches_events$strength == "free-living"]), linetype="dashed", color = "black", size=0.5) + coord_flip()
+```
+
+```{r Fig. S4 part 2, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+
+all_branches_events <- data %>% filter(! str_detect(node, "root"))
+
+all_branches_events["origin"][all_branches_events["origin"] == "EST"] <- "E"
+all_branches_events["state"][all_branches_events["state"] == "EST"] <- "E"
+all_branches_events <- drop_na(all_branches_events)
+
+FigS4d <- ggplot(all_branches_events, aes(y=loss_rate, x=origin, fill=state)) + 
+  geom_boxplot(adjust=1.5, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = c("orange","#c0ecf5")) +
+  theme(legend.position = "none") + 
+  theme(aspect.ratio=1) + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "0", method = "wilcox.test", hjust = 2) + 
+  geom_hline(yintercept=median(all_branches_events$loss_rate[all_branches_events$origin == "0"]), linetype="dashed", color = "black", size=0.5) + coord_flip() +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "gene loss rate")
+
+FigS4e <- ggplot(all_branches_events, aes(y=transfer_rate, x=origin, fill=state)) + 
+  geom_boxplot(adjust=1.5, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = c("orange","#c0ecf5")) +
+  theme(legend.position = "none") + 
+  theme(aspect.ratio=1) + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "0", method = "wilcox.test", hjust = 2) + 
+  geom_hline(yintercept=median(all_branches_events$transfer_rate[all_branches_events$origin == "0"]), linetype="dashed", color = "black", size=0.5) + coord_flip() +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "gene transfer rate")
+
+FigS4f <- ggplot(all_branches_events, aes(y=sqrt(duplication_rate), x=origin, fill=state)) + 
+  geom_boxplot(adjust=1.5, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = c("orange","#c0ecf5")) +
+  theme(legend.position = "none") + 
+  theme(aspect.ratio=1) + 
+  stat_compare_means(aes(label = after_stat(p.signif)), ref.group = "0", method = "wilcox.test", hjust = 2) + 
+  geom_hline(yintercept=sqrt(median(all_branches_events$duplication_rate[all_branches_events$origin == "0"])), linetype="dashed", color = "black", size=0.5) + coord_flip() +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "gene duplication rate (square root transformed)")
+```
+
+```{r Fig. S4, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+
+FigS4 <- plot_grid(FigS4a,
+                   FigS4b,
+                   FigS4c,
+                   FigS4d,
+                   FigS4e,
+                   FigS4f,
+                   nrow = 2,
+                   axis = "lr", 
+                   align = "hv",
+                   labels = c("A","B","C","D","E","F"))
+
+ggsave("FigS4.pdf", FigS4, width = 18, height = 12)
+
+FigS4
+```
+
+<br />
+<br />
+
+##### __data wrangling pt. 2a:__
+
+```{r data wrangling pt. 2a, warning=FALSE}
+
+tokeep <- read.table("./DLT_analyses_SpeciesRax_all_genes_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+files <- list.files(pattern=".txt", path="./DLT_analyses_SpeciesRax_all_genes_SR4/PerFamily_counts/",full.names = T)
+
+ancs <- vector()  # genes present in Enterobacterales ancestor 
+endo <- vector()  # genes present in at least an endosymbiont clade MRCA
+aftr <- vector()  # genes originated or acquired in Enterobacterales after any shift to endosymbiosis  
+nevr <- vector()  # genes which where originated or acquired in free-living only
+
+ubiq <- vector()  # genes present in all Enterobacterales spp.
+up50 <- vector()  # genes present in more than 50% of Endosmybionts spp.
+dn50 <- vector()  # genes present in less than 50% of Endosmybionts spp.
+lost <- vector()  # genes absent in Endosmybionts spp.
+
+j=1
+
+  for (i in files) {
+    #i="./DLT_analyses_SpeciesRax_all_genes_SR4/PerFamily_counts//OG???_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt"
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",i)
+    OG <- gsub("./DLT_analyses_SpeciesRax_all_genes_SR4/PerFamily_counts//","",OG)
+    names(df2)=c("node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="node")
+    if (sum(length(df2[df2$node == "s3",]$P)) > 0) {
+      ancs[[j]] <- OG
+    }
+    if (sum(as.numeric(df2[df2$state == "EST",]$L)) > 0) {
+      endo[[j]] <- OG
+      df2 <- df2[with(df2, ! grepl("^s", node)),]
+      df2 <- subset(df2, state == "E" |  state == "EST")
+      df2 <- subset(df2, P == 1)
+      if (length(df2$node) == 75) {
+        ubiq[[j]] <- OG
+        } else if (length(df2$node) > 36) {
+          up50[[j]] <- OG
+          } else if (length(df2$node) > 0) {
+            dn50[[j]] <- OG
+            } else if (length(df2$node) == 0) {
+              lost[[j]] <- OG
+           }
+      } else {
+        df2 <- df2[with(df2, ! grepl("^s", node)),]
+        if (sum(length(df2[df2$state == "E" | df2$state == "EST",]$P)) > 0) {
+          aftr[[j]] <- OG
+        } else {
+          nevr[[j]] <- OG
+    }
+      }
+    j = j + 1
+  }
+
+length(files)         # Among all genes
+length(na.omit(endo)) # genes present in at least one free-livinig MRCA of an endosymbiotic clade
+length(na.omit(aftr)) # genes originated or acquired in endosmybionts after any shift to endosymbiosis  
+length(na.omit(nevr)) # genes which where originated or acquired in free-living only
+
+# Among genes which were present in at least one free-living MRCA of an endosymbiotic clade
+length(na.omit(ubiq)) # genes present in all endosmybiont spp.
+length(na.omit(up50)) # genes present in more than 50% of endosmybionts spp.
+length(na.omit(dn50)) # genes present in less than 50% of endosmybionts spp.
+length(na.omit(lost)) # genes lost in all endosmybionts spp.
+```
+
+<br />
+<br />
+
+##### __data wrangling pt. 3a:__
+
+```{r data wrangling pt. 3a, warning=FALSE}
+files <- list.files(pattern=".txt", path="./DLT_analyses_SpeciesRax_all_genes_SR4/PerFamily_counts/",full.names = T)
+
+tokeep <- read.table("./DLT_analyses_SpeciesRax_all_genes_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+names(tokeep)=c("Node","Trait","Origin")
+
+tokeep$Origin[tokeep$Trait != "N"] <- "endosymbiont"
+tokeep$Origin[tokeep$Trait == "N"] <- "free-living"
+
+for (k in c("free-living","endosymbiont")){
+
+  df=data.frame(OG=character(),mean=numeric())
+  ortogruppo = vector()
+  media_OG = vector()
+  j = 1
+  for (i in files) {
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    df2$speciations. <- as.numeric(df2$speciations.)
+    df2$duplications. <- as.numeric(df2$duplications.)
+    df2$losses. <- as.numeric(df2$losses.)
+    df2$transfers. <- as.numeric(df2$transfers.)
+    OG <- gsub("./PerFamily_counts//","",i)
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_speciesEventCounts.txt","",OG)
+    names(df2)=c("Node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="Node")
+    df2 <- subset(df2, Origin == k)
+    if (length(df2$Trait) >= 1) {
+      df2$freq <- (df2$L / (df2$S + df2$L))
+      df2 <- na.omit(df2)
+      mean_OG=mean(df2$freq)
+      #print(mean_OG)
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- mean_OG
+    } else {
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- "NA"
+    }
+      j = j + 1
+  }
+
+  df=data.frame(OG=ortogruppo,mean_freq=media_OG)
+  df$OG <- gsub("./DLT_analyses_SpeciesRax_all_genes_SR","",df$OG)
+  df$origin <- k
+  assign(paste("df", k, sep="_"), df)
+}
+
+df <- rbind(`df_free-living`,df_endosymbiont)
+df$OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",df$OG)
+df$mean_freq <- as.numeric(df$mean_freq)
+```
+
+<br />
+<br />
+
+##### __Fig. S5 - families mean loss frequency delta across functional categories:__
+
+```{r Fig. S5, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+clean <- merge(df,dnds, by="OG")
+clean<-subset(clean, free!="NA")
+clean<-subset(clean, mean_freq!="NA")
+clean<-subset(clean, mean_freq!="NaN")
+clean<-subset(clean, free < 1)
+clean<-subset(clean, endo < 1)
+cog <- read.table("cog.tsv", sep="\t", header = T)
+clean <- left_join(clean, cog, by = "OG")
+clean <- clean %>% separate_rows(cog, sep = '(?<=.)(?=.)')
+cog_conversion <- read.table("cog_conversion.tsv", sep="\t", header = T)
+clean <- left_join(clean, cog_conversion, by = "cog")
+
+clean <- subset(clean, cog != "A")
+clean <- subset(clean, cog != "B")
+clean <- subset(clean, cog != "W")
+clean <- subset(clean, cog != "Z")
+clean <- subset(clean, cog != "na")
+clean <- subset(clean, cog != "-")
+
+clean <- clean[clean$OG %in% endo,]  
+
+delta <- clean %>% group_by(cog, origin) %>% summarise(median_freq=median(mean_freq))
+delta <- as.data.frame(na.omit(delta))
+delta <- reshape(delta, idvar = "cog", timevar = "origin", direction = "wide")
+delta$delta <- (delta$median_freq.endosymbiont - delta$`median_freq.free-living`)
+delta <- left_join(delta, cog_conversion, by = "cog")
+delta <- delta %>% arrange(delta)
+delta <- delta[order(delta$delta, decreasing = TRUE), ]
+
+delta
+
+order <- delta$description
+
+FigS5 <- ggplot(data=clean, aes(x = factor(description, order), y=mean_freq, fill=origin)) + 
+  geom_boxplot(outlier.shape = NA, position = position_dodge(1) ) +
+  coord_flip() + theme_bw() + ylim(0, 1.2) +
+  stat_compare_means(aes(label = after_stat(p.signif)), size=5, label.y = 0.75, label.x = 10, paired = T) +
+  scale_fill_manual(values=c("orange", "#c0ecf5")) + 
+  xlab("") + theme(legend.position = "none") +
+  theme(axis.text.y = element_text(size = 14)) + theme(axis.text.x = element_text(size = 14)) +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "mean loss frequency") + ylim(0,1)
+
+ggsave("FigS5.pdf", FigS5, width = 12, height = 12)
+
+FigS5
+```
+
+<br />
+<br />
+
+##### __Fig. 4c - families mean loss frequency correlate with free-living selection regime:__
+
+```{r Fig. 4c, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+
+clean <- merge(df,dnds, by = "OG")
+
+colnames(clean) <- c("OG","mean_loss_freq","origin","dnds_free","dnds_endo")
+clean <- spread(clean, key = origin, value = mean_loss_freq)
+colnames(clean) <- c("OG","dnds_free","dnds_endo","mean_loss_freq_endo","mean_loss_freq_free")
+
+clean <- clean[c("OG","dnds_free","mean_loss_freq_endo")]
+
+clean <- subset(clean, dnds_free != "NA")
+clean <- subset(clean, dnds_free < 1)
+
+clean <- clean[clean$OG %in% endo,]  
+
+dim(clean) # number of OGs considered in this analysis
+
+Fig4c <- ggplot(clean, aes(x=dnds_free, y=mean_loss_freq_endo)) + 
+  geom_point(size = 4, alpha =.05, pch = 20, color = "orange") + 
+  geom_smooth(method = "lm", se = F, color="black", fullrange = TRUE, linetype = "dashed") +
+  scale_linetype_manual(values ="dashed") +
+  theme_bw() +
+  xlab("dNdS in free-living") + 
+  ylab("mean loss frequency in endosymbionts") +
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(strip.text = element_text(face = "bold", size = rel(0.45)), strip.background = element_rect(fill = "white", colour = "black", size = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(plot.title = element_text(size = 10)) + xlim(0,1) + ylim(0,1) +
+  theme(legend.position = "none") + xlim(0,.75) +
+  theme(axis.text.y = element_text(size = 14)) + theme(axis.text.x = element_text(size = 14)) + theme(aspect.ratio = 1)
+  
+
+Fig4c <- Fig4c + stat_cor(method = "spearman", cex = 5)
+
+ggsave("Fig4c.pdf", Fig4c, width = 7, height = 7)
+
+Fig4c
+```
+
+<br />
+<br />
+
+##### __Fig. S8a - families mean loss frequency and free-living selective regime - boxplot:__
+
+```{r Fig. S8a, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+
+clean <- merge(df,dnds, by = "OG")
+
+colnames(clean) <- c("OG","mean_loss_freq","origin","dnds_free","dnds_endo")
+clean <- spread(clean, key = origin, value = mean_loss_freq)
+colnames(clean) <- c("OG","dnds_free","dnds_endo","mean_loss_freq_endo","mean_loss_freq_free")
+
+clean <- clean[c("OG","dnds_free","mean_loss_freq_endo")]
+
+clean <- subset(clean, dnds_free != "NA")
+clean <- subset(clean, dnds_free < 1)
+
+clean['state'] <- "NA"
+
+clean[clean$OG %in% ubiq,]$state <- "ubiquitous" 
+clean[clean$OG %in% up50,]$state <- "more than 50% spp." 
+clean[clean$OG %in% dn50,]$state <- "less than 50% spp." 
+clean[clean$OG %in% lost,]$state <- "allways lost" 
+
+clean <- subset(clean, state != "NA")
+
+my_comparisons <- list( 
+  c("ubiquitous", "more than 50% spp."), c("ubiquitous", "less than 50% spp."), c("ubiquitous", "allways lost"),
+  c("allways lost", "more than 50% spp."), c("allways lost", "less than 50% spp."), 
+  c("more than 50% spp.", "less than 50% spp.")
+  )
+
+clean <-subset(clean, dnds_free < 1)
+
+FigS8a <- ggplot(clean, aes(y=dnds_free, x=state)) + 
+  geom_boxplot(width=0.2, outlier.shape = NA, fill="orange") + 
+  theme_bw() +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  labs(y = "dNdS in free-living species") + labs(x = "gene present in at least one free-living MRCA of an endosymbiotic clade") + 
+  stat_compare_means(comparisons = my_comparisons, method="wilcox.test") 
+```
+
+<br />
+<br />
+
+##### __Fig. S7 - selection regime shift is consistent across different functional categories:__
+
+```{r Fig. S7, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+clean <- merge(df,dnds, by="OG")
+clean<-subset(clean, free!="NA")
+clean<-subset(clean, endo!="NA")
+clean<-subset(clean, mean_freq!="NA")
+clean<-subset(clean, mean_freq!="NaN")
+clean<-subset(clean, free < 1)
+clean<-subset(clean, endo < 1)
+
+clean$delta <- clean$endo - clean$free
+clean <- subset(clean, delta!="NA")
+
+cog <- read.table("cog.tsv", sep="\t", header = T)
+cog_clean <- left_join(clean, cog, by = "OG")
+cog_clean <- cog_clean %>% mutate(PCT = ntile(delta, 1000))  %>%  data.frame()  
+
+cog_clean <- cog_clean %>%separate_rows(cog, sep = '(?<=.)(?=.)')
+
+cog_clean <- subset(cog_clean, cog != "S")
+cog_clean <- subset(cog_clean, cog != "NA")
+cog_clean <- subset(cog_clean, cog != "-")
+cog_clean <- subset(cog_clean, cog != "B")  # too few genes for the cog "Chromatin structure and dynamics" just has one genes
+cog_clean <- subset(cog_clean, cog != "W")  # too few genes for the cog "Extracellular structures"
+
+cog_conversion <- read.table("cog_conversion.tsv", sep="\t", header = T)
+cog_clean <- left_join(cog_clean, cog_conversion, by = "cog")
+
+median(cog_clean$delta)
+sd(cog_clean$delta)
+
+FigS7 <- cog_clean %>% 
+  group_by(description) %>%
+  mutate(mdelta = median(delta)) %>%
+  subset(origin == "free-living")  %>%
+  ggplot(aes(delta)) +
+  geom_density(aes(y=..count..)) +
+  theme_bw() + 
+  geom_vline(aes(xintercept= 0), colour='black', linetype="dashed") +
+  geom_vline(aes(xintercept= mdelta), colour='orange', size=0.5) +
+  facet_wrap(~ description, nrow=3) +
+  theme(strip.text = element_text(face = "bold", size = rel(.4)), strip.background = element_rect(fill = "white", colour = "black", size = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + labs(x = "delta dNdS" ) + labs(y = "number of genes")
+
+
+ggsave("FigS7.pdf", FigS7, width = 12, height = 6)
+
+FigS7
+```
+
+<br />
+<br />
+
+##### __data wrangling pt. 4a:__
+
+```{r data wrangling pt. 4a, warning=FALSE}
+files <- list.files(pattern=".txt", path="./DLT_analyses_SpeciesRax_all_genes_SR4/PerFamily_counts/",full.names = T)
+
+tokeep <- read.table("./DLT_analyses_SpeciesRax_all_genes_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+names(tokeep)=c("Node","Trait","Origin")
+
+for (k in c("A","B","C","D","E1","E2","F","G","H","I","L","0")){
+  df=data.frame(OG=character(),mean=numeric())
+  ortogruppo = vector()
+  media_OG = vector()
+  j = 1
+  for (i in files) {
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    df2$speciations. <- as.numeric(df2$speciations.)
+    df2$duplications. <- as.numeric(df2$duplications.)
+    df2$losses. <- as.numeric(df2$losses.)
+    df2$transfers. <- as.numeric(df2$transfers.)
+    OG <- gsub("./PerFamily_counts//","",i)
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_speciesEventCounts.txt","",OG)
+    names(df2)=c("Node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="Node")
+    df2 <- subset(df2, Origin == k)
+    if (length(df2$Trait) >= 1) {
+      df2$freq <- (df2$L / (df2$S + df2$L))
+      df2 <- na.omit(df2)
+      mean_OG=mean(df2$freq)
+      #print(mean_OG)
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- mean_OG
+    } else {
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- "NA"
+    }
+    j = j + 1
+  }
+
+  df=data.frame(OG=ortogruppo,mean_freq=media_OG)
+  df$OG <- gsub("./DLT_analyses_SpeciesRax_all_genes_SR","",df$OG)
+  df$origin <- k
+  assign(paste("df", k, sep="_"), df)
+}
+
+df <- rbind(df_A,df_B,df_C,df_D,df_E1,df_E2,df_F,df_G,df_H,df_I,df_L,df_0)
+df$OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",df$OG)
+```
+
+<br />
+<br />
+
+##### __Fig. S6 - functional categories ranking for families mean loss frequency:__
+
+```{r Fig. S6, fig.width=12, fig.height=8, message=FALSE, warning=FALSE}
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+clean <- merge(df,dnds, by="OG")
+clean <- subset(clean, dnds != "NA")
+clean <- subset(clean, mean_freq != "NA")
+clean <- subset(clean, mean_freq != "NaN")
+clean <- subset(clean, free != "NaN")
+clean <- subset(clean, endo != "NaN")
+
+cog <- read.table("cog.tsv", sep="\t", header = T)
+clean_endo <- left_join(clean, cog, by = "OG")
+
+clean_endo <- subset(clean_endo, cog != "NA")
+clean_endo <- subset(clean_endo, cog != "-")
+
+clean_endo <- clean_endo %>%separate_rows(cog, sep = '(?<=.)(?=.)')
+
+clean_endo <- subset(clean_endo, cog != "A")
+clean_endo <- subset(clean_endo, cog != "B")
+clean_endo <- subset(clean_endo, cog != "W")
+clean_endo <- subset(clean_endo, cog != "Z")
+
+clean_endo <- left_join(clean_endo, cog_conversion, by = "cog")
+
+clean_endo$mean_freq <- as.numeric(clean_endo$mean_freq)
+
+clean_endo <- clean_endo[clean_endo$OG %in% endo,]  
+
+A <- subset(clean_endo, origin == "A" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+A$rank <- rownames(A)
+A$origin <- "A"
+
+B <- subset(clean_endo, origin == "B" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+B$rank <- rownames(B)
+B$origin <- "B"
+
+C <- subset(clean_endo, origin == "C" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+C$rank <- rownames(C)
+C$origin <- "C"
+
+D <- subset(clean_endo, origin == "D" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+D$rank <- rownames(D)
+D$origin <- "D"
+
+E1 <- subset(clean_endo, origin == "E1" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+E1$rank <- rownames(E1)
+E1$origin <- "E1"
+
+E2 <- subset(clean_endo, origin == "E2" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+E2$rank <- rownames(E2)
+E2$origin <- "E2"
+
+effe <- subset(clean_endo, origin == "F" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+effe$rank <- rownames(effe)
+effe$origin <- "effe"
+
+G <- subset(clean_endo, origin == "G" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+G$rank <- rownames(G)
+G$origin <- "G"
+
+H <- subset(clean_endo, origin == "H" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+H$rank <- rownames(H)
+H$origin <- "H"
+
+I <- subset(clean_endo, origin == "I" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+I$rank <- rownames(I)
+I$origin <- "I"
+
+L <- subset(clean_endo, origin == "L" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+L$rank <- rownames(L)
+L$origin <- "L"
+
+zero <- subset(clean_endo, origin == "0" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+zero$rank <- rownames(zero)
+zero$origin <- "zero"
+
+loss_freq <- dplyr::bind_rows(A,B,C,D,E1,E2,effe,G,H,I,L,zero)
+loss_freq$freq <- as.numeric(loss_freq$freq)
+loss_freq$rank <- as.numeric(loss_freq$rank)
+
+loss_freq$origin[loss_freq$origin == "effe"] <- "F"
+loss_freq$origin[loss_freq$origin == "zero"] <- "free"
+
+loss_freq <- loss_freq %>%  mutate(mycolor = ifelse(origin == "free", "#c0ecf5", "orange"))
+
+order <- aggregate(rank~description,loss_freq,sum)
+order <- order[order(order$rank),]$description
+
+FigS6 <- ggplot(loss_freq, aes(x = factor(description, order), y=(as.numeric(rank)), label=origin, fill=mycolor)) + 
+  geom_point() + 
+  geom_label_repel(max.overlaps = Inf, min.segment.length = 0) + scale_fill_identity(c("#c0ecf5", "orange")) +
+  theme_bw() + coord_flip() +
+  xlab("") + ylab("") + theme(legend.position = "none") +
+  theme(axis.text.y = element_text(size = 12)) + theme(axis.text.x = element_text(size = 12)) +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "mean loss frequency ranks")
+
+ggsave("FigS6.pdf", FigS6, width = 12, height = 12)
+
+FigS6
+```
+
+<br />
+<br />
+
+##### __Fig. 4b - functional categories ranking for families mean loss frequency - wordcloud:__
+
+```{r Fig. 4b, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+
+loss_freq_endo <- subset(loss_freq, mycolor == 'orange')[,c(1,3,4)]
+loss_freq_endo <- aggregate(rank~description,loss_freq_endo,sum)
+
+loss_freq_endo$description[loss_freq_endo$description == "Secondary metabolites biosynthesis, transport and catabolism"] <- "Secondary metabolites"
+loss_freq_endo$description[loss_freq_endo$description == "Intracellular trafficking, secretion, and vesicular transport"] <- "Intracellular trafficking"
+loss_freq_endo$description[loss_freq_endo$description == "Secondary metabolites biosynthesis, transport and catabolism"] <- "Secondary metabolites"
+
+set.seed(sample(1:100,1))
+
+Fig4b <- ggplot(loss_freq_endo, aes(label = description, size = rank, color = rank)) +
+  geom_text_wordcloud(shape = "square", grid_size = 0, rm_outside = F, eccentricity = 2) +
+  scale_size_area(max_size = 10) +
+  theme_void() +
+  scale_color_gradient(low = "darkgray", high = "orange") +
+  theme(aspect.ratio = 1)
+
+ggsave("Fig4b.pdf", Fig4b, width = 12, height = 12)
+
+Fig4b
+```
+
+<br />
+<br />
+
+##### __Fig. 4a - families mean loss frequency correlation across different endosymbiont clades:__
+
+```{r Fig. 4a, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+df_cor <- data.frame(clean_endo[,c(-4,-5,-6,-7,-8,-9)])
+df_cor <- reshape(df_cor, idvar = "OG", timevar = "origin", direction = "wide")
+row.names(df_cor) <- df_cor$OG
+df_cor <- df_cor[,c(-1)]
+
+new_order <-  sort(colnames(df_cor),decreasing=F)
+df_cor <- df_cor[, new_order]
+
+colnames(df_cor) <- c("free-living","A","B","C","D","E1","E2","F","G","H","I","L")
+my.palette <- get_palette(c("white", "white", "orange"), 10)
+cor.test <- df_cor %>% cor_test(method = "spearman", use='pairwise.complete.obs')
+cor.test$p <- p.adjust(cor.test$p, method = "hochberg", n = length(cor.test$p))
+cor.mat <- as_cor_mat(cor.test)
+p.mat <- cor_pmat(df_cor)
+
+Fig4a <- ggcorrplot(cor.mat, p.mat = p.mat, sig.level = 0.001, hc.order = F, type = "lower", outline.col = "white", ggtheme = ggplot2::theme_bw,
+           colors = c("white", "white", "orange"),method = "circle") + 
+  theme(axis.text.y = element_text(size = 14)) + theme(axis.text.x = element_text(size = 14))
+
+ggsave("Fig4a.pdf", Fig4a, width = 7, height = 7)
+
+Fig4a
+```     
+
+<br />
+<br />
+
+##### __Fig. S8b - families mean loss frequency correlation with free-living selection regime (across different endosymbiont lineages + free-living):__
+
+```{r Fig. S8b, message=FALSE, warning=FALSE}
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+
+clean <- merge(df,dnds, by = "OG")
+
+clean <- subset(clean, mean_freq != "NA")
+clean$mean_freq <- as.numeric(clean$mean_freq)
+
+clean$origin[clean$origin == 0] <- 'free-living'
+
+clean <- clean[clean$OG %in% endo,]  
+
+FigS8b <- ggplot(clean, aes(x=free, y=mean_freq)) + 
+  geom_point(size = 4, alpha =.05, pch = 20, color = "orange") + 
+  geom_smooth(method = "lm", se = F, color="black", fullrange = TRUE, linetype = "dashed") +
+  scale_linetype_manual(values ="dashed") +
+  facet_wrap( ~ origin) +
+  stat_cor(method = "spearman", label.y = 0.75, size = 2) +
+  theme_bw() +
+  xlab("dNdS in free-living species") + 
+  ylab("gene loss rate") +
+  theme(plot.title = element_text(size = 10)) + 
+  theme(aspect.ratio = 1) +
+  facet_wrap( ~ origin) +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(strip.text = element_text(face = "bold", size = rel(0.45)), strip.background = element_rect(fill = "white", colour = "black", size = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(plot.title = element_text(size = 10)) + xlim(0,1) + ylim(0,1)
+```
+
+<br />
+<br />
+
+##### __Fig. S8:__
+
+```{r Fig. S8, fig.width=16, fig.height=12, message=FALSE, warning=FALSE}
+
+FigS8 <- plot_grid(FigS8a,FigS8b,
+                  axis = "l", 
+                  align = "hv",
+                  labels = c("A","B"))
+
+ggsave("FigS8.pdf", FigS8, width = 12, height = 6)
+
+FigS8
+```
+
+<br />
+<br />
+
+##### __DNA repair genes__
+
+```{r DNA repair genes, fig.width=12, fig.height=6, message=FALSE, warning=FALSE, eval = FALSE}
+
+clean <- merge(df,dnds, by="OG")
+repair_genes <- read.table("DNA_repair_annotations.tsv", sep="\t",header=T)
+tmp <- clean[clean$OG %in% repair_genes$OG, ]
+tmp <- reshape(tmp, idvar = "OG", timevar = "origin", direction = "wide")
+tmp <- tmp[,c(1:5)]
+tmp <- merge(tmp, repair_genes, by="OG")
+colnames(tmp) <- c("OG", "loss_F","dnds_F","dnds_E","loss_E", "gene")
+repair_genes <- tmp[, c(1, 6, 2, 5, 3, 4)]
+
+repair_genes
+
+repair_genes$loss_F <- as.numeric(repair_genes$loss_F)
+repair_genes$loss_E <- as.numeric(repair_genes$loss_E)
+repair_genes$dnds_F <- as.numeric(repair_genes$dnds_F)
+repair_genes$dnds_E <- as.numeric(repair_genes$dnds_E)
+repair_genes <- na.omit(repair_genes)
+  
+# is the omega of specific DNA repair genes statistically higher than genes in the category "Replication, recombination and repair"??!
+ks.test(
+  repair_genes$dnds_E,
+  cog_clean$endo[cog_clean$description == "Replication, recombination and repair"],
+  alternative = "greater")
+
+# is the omega of genes in "Replication, recombination and repair" statistically higher than all other genes??!
+ks.test(
+  cog_clean$endo[cog_clean$description == "Replication, recombination and repair"],
+  cog_clean$endo[cog_clean$description != "Replication, recombination and repair"],
+  alternative = "greater")
+
+# is the loss frquency of specific DNA repair genes statistically higher than genes in the category "Replication, recombination and repair"??!
+ks.test(
+  repair_genes$loss_E,
+  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description == "Replication, recombination and repair"], 
+  alternative = "greater")
+
+# is the loss frquency of genes in "Replication, recombination and repair" statistically higher than all other genes??!
+ks.test(
+  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description == "Replication, recombination and repair"],
+  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description != "Replication, recombination and repair"],
+  alternative = "greater")
+```
+
+<br />
+<br />
+
+##### __linearize the tree:__
+
+```{r linearize_tree, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+tree <- read.tree("DLT_analyses_SpeciesRax_all_genes_SR4/DLT_tree_conv.newick")
+tree <- drop.tip(tree, "NZ-LG025083.1")
+tree <- drop.tip(tree,c("NZ-CP028926.1","NZ-CP009610.1"))           # drop outgroups
+tree <- reroot(tree,which((tree$tip.label == "NZ-CP050969.1") == "TRUE"))     # reroot on Plesiomonas shigelloides
+tree$tip.label <- gsub("\\.[0-9]", "",tree$tip.label )
+
+info <- merge(annot, sp_traits, by = "row.names")
+row.names(info) <- info$Row.names
+
+#info <- info[!info$species.y == "NZ-CP028926", ]
+#info <- info[!info$species.y == "NZ-CP009610", ]
+
+treec1 <- chronos(tree, model = "correlated", lambda = 1)
+lnLt1 <- attr(treec1, "ploglik")
+treec2 <- chronos(tree, model = "correlated", lambda = 2)
+lnLt2 <- attr(treec2, "ploglik")
+treec3 <- chronos(tree, model = "correlated", lambda = 3)
+lnLt3 <- attr(treec3, "ploglik")
+treec4 <- chronos(tree, model = "correlated", lambda = 4)
+lnLt4 <- attr(treec4, "ploglik")
+treec5 <- chronos(tree, model = "correlated", lambda = 5)
+lnLt5 <- attr(treec5, "ploglik")
+treec6 <- chronos(tree, model = "correlated", lambda = 6)
+lnLt6 <- attr(treec6, "ploglik")
+treec7 <- chronos(tree, model = "correlated", lambda = 7)
+lnLt7 <- attr(treec7, "ploglik")
+treec8 <- chronos(tree, model = "correlated", lambda = 8)
+lnLt8 <- attr(treec8, "ploglik")
+treec9 <- chronos(tree, model = "correlated", lambda = 9)
+lnLt9 <- attr(treec9, "ploglik")
+treec10 <- chronos(tree, model = "correlated", lambda = 10)
+lnLt10 <- attr(treec10, "ploglik")
+
+lnLt <- c(lnLt1,lnLt2,lnLt3,lnLt4,lnLt5,lnLt6,lnLt7,lnLt8,lnLt9,lnLt10)
+
+plot(lnLt)
+
+treec <- chronos(tree, model = "correlated", lambda = 1)
+info <- info[match(treec$tip.label, info$species.y),]
+
+treec$tip.label <- info$sp
+```
+
+<br />
+<br />
+
+##### __Fig. 1 - endosymbiosis ancestral state reconstruction:__
+
+```{r ASR, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+state <- setNames(as.factor(info$endosymbiont),info$sp)
+
+DOLLO <- matrix(c(0,1,0,0),2,2)
+
+fitARD<-ace(state,treec, model=DOLLO, type="discrete")
+
+cols<-setNames(c("orange","turquoise"),levels(state))
+
+plot.phylo(treec,type="fan", cex=0.45, lwd=1, label.offset=0.025)
+
+tiplabels(pie=to.matrix(state[treec$tip.label],levels(state)),piecol=cols,cex=0.1)
+
+nodelabels(node=1:treec$Nnode+Ntip(treec),
+           pie=fitARD$lik.anc,piecol=cols,cex=0.15)
+
+add.simmap.legend(colors=cols,prompt=FALSE,x=0.9*par()$usr[1],
+                  y=0.8*par()$usr[3],fsize=0.8)
+```
+
+```{r Fig. 1, fig.width=12, fig.height=12, message=FALSE, warning=FALSE}
+pdf(file="Fig1.pdf", width=15, height=15)
+
+tree <- beast_tree
+origina_annot <- read.table("phylogenetic_resolutions/list_of_origins.tsv", sep="\t", header=T)
+
+tmp <- data
+tmp$species <- gsub("\\.[0-9]", "",tmp$node )
+tmp  <- left_join(tmp, origina_annot, by = 'species')
+origina_annot  <- tmp[,c(1,14,15,16,17,18,19,20,21,22,23,24)]
+
+wow <- origina_annot
+wow <- wow[,c(1,3)]
+colnames(wow) <- c("id","species")
+
+p <- ggtree(tree, layout='circular', branch.length='none')  %<+% wow + geom_tiplab(aes(label=species), offset = 7, size=3,fontface = "italic") +
+  theme(legend.position = "none")
+
+p <- p + xlim(NA, 31)
+
+p <- p + scale_color_manual(values=c("black", "white")) + geom_tippoint(aes(color=state)) + scale_color_manual(values=c("orange","orange","#c0ecf5")) +
+  geom_point2(aes(subset=(label=="s96")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s96")), label="A", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="AP012551.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="AP012551.1")), label="B", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCF-012026695.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCF-012026695.1")), label="C", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s156")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s156")), label="D", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s153")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s153")), label="E1", size=2, color='white', fontface = "bold") +
+    geom_point2(aes(subset=(label=="NZ-CP006568.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="NZ-CP006568.1")), label="E2", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s142")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s142")), label="F", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s28")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s28")), label="G", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="GCA-001457715.1")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="GCA-001457715.1")), label="H", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s181")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s181")), label="I", size=2, color='white', fontface = "bold") +
+  geom_point2(aes(subset=(label=="s192")), shape=21, size=5, fill='black') +
+    geom_text2(aes(subset=(label=="s192")), label="L", size=2, color='white', fontface = "bold")
+ 
+rownames(origina_annot) <- origina_annot$node
+origina_annot <- origina_annot[,c(5,6,7,8,9,10,11,12)]
+
+gheatmap(p, origina_annot, offset=0.5, width=0.25, hjust=0, colnames_style(color="white"),
+         colnames=FALSE, colnames_offset_y = 8) + 
+  theme(legend.position = 'none') +
+  scale_fill_manual(values=c("white","#fd7f6f", "#7eb0d5", "#b2e061", "#bd7ebe", "#ffd200", "#e69138", "#beb9db", "#fdcce5", "#8bd3c7", "lightgray","darkgray"))
+
+dev.off() 
+```
+
+<br />
+<br />
+
+# __TESTING AN ALTERNATE TOPOLOGY:__
+
+Here we perform a large subset of analyses on an alternate topology, as a sensitivity test on how the phylogenetic resolution can impact our findings.
+
+<br />
+<br />
+
+##### __data wrangling pt. 1b:__
+
+```{r data wrangling pt. 1b, warning=FALSE}
+node_annotation = read.table("DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/node_annotation.tsv",sep="\t",header=T)   #Path to node annotation
+
+rates = read.table("DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/rates_conv.txt",sep=" ",header=F)             #Path to per_species_rates
+colnames(rates) <- c("node","duplication_rate","loss_rate","transfer_rate")
+counts = read.table("DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/counts_conv.txt",sep=" ",header=F)          #Path to per_species_counts
+colnames(counts) <- c("node","S","SL","D","T","TL")
+counts$S <- gsub("S=", "", counts$S)
+counts$SL <- gsub("SL=", "", counts$SL)
+counts$D <- gsub("D=", "", counts$D)
+counts$T <- gsub("T=", "", counts$T)
+counts$TL <- gsub("TL=", "", counts$TL)
+
+tmp  <- left_join(node_annotation, rates, by = 'node')
+data  <- left_join(tmp, counts, by = 'node')
+```
+
+<br />
+<br />
+
+##### __Fig. S9a + S9b + S9c - DTL rates differ between symbiont and free-living branches:__
+
+NB: endosymbiosis-enstablishment branches are not included here.
+
+```{r Fig. S9a S9b S9c, fig.width=6, fig.height=6, warning=FALSE}
+all_branches_events <- data %>% filter(! str_detect(state, "EST"))
+
+all_branches_events$loss_rate <- as.numeric(all_branches_events$loss_rate)
+all_branches_events$duplication_rate <- as.numeric(all_branches_events$duplication_rate)
+all_branches_events$transfer_rate <- as.numeric(all_branches_events$transfer_rate)
+
+all_branches_events$state[all_branches_events$state == "E"] <- "endosymbiont"
+all_branches_events$state[all_branches_events$state == "N"] <- "free-living"
+
+state <- ""
+levels(state) <- c("endosymbiont","free-living")
+cols<-setNames(c("orange","#c0ecf5"),levels(state))
+
+shapiro.test(all_branches_events$loss_rate)
+p <- ks.test(all_branches_events$loss_rate[all_branches_events$state == "endosymbiont"],all_branches_events$loss_rate[all_branches_events$state == "free-living"])$p.value
+FigS9a <- ggplot(all_branches_events, aes(y=loss_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("loss rates p=",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene loss rates") + theme(plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim=c(0, .5))
+
+shapiro.test(all_branches_events$duplication_rate)
+p <- ks.test(all_branches_events$duplication_rate[all_branches_events$state == "endosymbiont"],all_branches_events$duplication_rate[all_branches_events$state == "free-living"])$p.value
+FigS9b <-  ggplot(all_branches_events, aes(y=duplication_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("duplication rates p=",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene duplication rates") + theme(plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim=c(0, .05))
+
+shapiro.test(all_branches_events$transfer_rate)
+p <- ks.test(all_branches_events$transfer_rate[all_branches_events$state == "endosymbiont"],all_branches_events$transfer_rate[all_branches_events$state == "free-living"])$p.value
+FigS9c <- ggplot(all_branches_events, aes(y=transfer_rate, x=state, fill=state)) + 
+  geom_boxplot(adjust=1.5, width=0.2, outlier.shape = NA) + 
+  theme_bw() + scale_fill_manual(values = cols) + ggtitle(paste("transfer rates p= ",round(p,4))) +
+  theme(legend.position = "none") + 
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) + 
+  theme(axis.title.x = element_blank()) + labs(y = "gene transfer rates") + theme(plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim=c(0, .5))
+```
+
+<br />
+<br />
+
+##### __Fig. S9d - contingent gene losses overall:__
+
+```{r Fig. S9d, warning=FALSE, fig.width=5, fig.height=5, warning=FALSE}
+timeline <-  read.table("DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/lineages.tsv",sep="\t",header=T) 
+
+timeline  <- left_join(timeline, data, by = 'node')
+
+timeline <- timeline %>%
+  group_by(coordinate, origin.x) %>% 
+  summarise_at(vars("loss_rate"), mean)
+
+tmp <- timeline %>%
+  mutate(name2=origin.x)
+
+FigS9d <- ggplot(data=tmp, aes(x=coordinate, y=loss_rate, colour=origin)) + 
+  xlab("") + theme_bw() + theme(text = element_text(size = 10)) + 
+  geom_smooth(xintercept=-1, linetype="dashed", colour = "orange", size=1, alpha=0.2, colour=timeline$origin) +
+  theme(
+      legend.position="none",
+      plot.title = element_text(size=14),
+      panel.grid = element_blank()
+    ) + theme_bw() + theme(axis.title.x=element_blank()) + geom_vline(xintercept = 0, linetype="dotted",size=.5) +
+    theme(strip.background =element_rect(fill="white")) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  theme(aspect.ratio=1) +
+  labs(y = "gene loss rate") + labs(x = "branch") + theme(plot.title = element_text(size = 10))
+```
+
+<br />
+<br />
+
+```{r data wrangling pt. 2b, warning=FALSE}
+files <- list.files(pattern=".txt", path="./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/PerFamily_counts/",full.names = T)
+
+tokeep <- read.table("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+ancs <- vector()  # genes present in Enterobacterales ancestor 
+endo <- vector()  # genes present in at least an endosymbiont clade MRCA
+aftr <- vector()  # genes originated or acquired in Enterobacterales after any shift to endosymbiosis  
+nevr <- vector()  # genes which where originated or acquired in free-living only
+
+ubiq <- vector()  # genes present in all Enterobacterales spp.
+up50 <- vector()  # genes present in more than 50% of Endosmybionts spp.
+dn50 <- vector()  # genes present in less than 50% of Endosmybionts spp.
+lost <- vector()  # genes absent in Endosmybionts spp.
+
+j=1
+
+  for (i in files) {
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",i)
+    OG <- gsub("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/PerFamily_counts//","",OG)
+    names(df2)=c("node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="node")
+    if (sum(length(df2[df2$node == "s3",]$P)) > 0) {
+      ancs[[j]] <- OG
+    }
+    if (sum(as.numeric(df2[df2$state == "EST",]$L)) > 0) {
+      endo[[j]] <- OG
+      df2 <- df2[with(df2, ! grepl("^s", node)),]
+      df2 <- subset(df2, state == "E" |  state == "EST")
+      df2 <- subset(df2, P == 1)
+      if (length(df2$node) == 75) {
+        ubiq[[j]] <- OG
+        } else if (length(df2$node) > 36) {
+          up50[[j]] <- OG
+          } else if (length(df2$node) > 0) {
+            dn50[[j]] <- OG
+            } else if (length(df2$node) == 0) {
+              lost[[j]] <- OG
+           }
+      } else {
+        df2 <- df2[with(df2, ! grepl("^s", node)),]
+        if (sum(length(df2[df2$state == "E" | df2$state == "EST",]$P)) > 0) {
+          aftr[[j]] <- OG
+        } else {
+          nevr[[j]] <- OG
+    }
+      }
+    j = j + 1
+  }
+
+length(files)         # Among all genes
+length(na.omit(endo)) # genes present in at least one free-livinig MRCA of an endosymbiotic clade
+length(na.omit(aftr)) # genes originated or acquired in endosmybionts after any shift to endosymbiosis  
+length(na.omit(nevr)) # genes which where originated or acquired in free-living only
+
+# Among genes which were present in at least one free-living MRCA of an endosymbiotic clade
+length(na.omit(ubiq)) # genes present in all endosmybiont spp.
+length(na.omit(up50)) # genes present in more than 50% of endosmybionts spp.
+length(na.omit(dn50)) # genes present in less than 50% of endosmybionts spp.
+length(na.omit(lost)) # genes lost in all endosmybionts spp.
+```
+
+##### __data wrangling pt. 3b:__
+
+```{r data wrangling pt. 3b, warning=FALSE}
+files <- list.files(pattern=".txt", path="./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/PerFamily_counts/",full.names = T)
+
+tokeep <- read.table("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+names(tokeep)=c("Node","Trait","Origin")
+
+tokeep$Origin[tokeep$Trait != "N"] <- "endosymbiont"
+tokeep$Origin[tokeep$Trait == "N"] <- "free-living"
+
+for (k in c("free-living","endosymbiont")){
+
+  df=data.frame(OG=character(),mean=numeric())
+  ortogruppo = vector()
+  media_OG = vector()
+  j = 1
+  for (i in files) {
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    df2$speciations. <- as.numeric(df2$speciations.)
+    df2$duplications. <- as.numeric(df2$duplications.)
+    df2$losses. <- as.numeric(df2$losses.)
+    df2$transfers. <- as.numeric(df2$transfers.)
+    OG <- gsub("./PerFamily_counts//","",i)
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_speciesEventCounts.txt","",OG)
+    names(df2)=c("Node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="Node")
+    df2 <- subset(df2, Origin == k)
+    if (length(df2$Trait) >= 1) {
+      df2$freq <- (df2$L / (df2$S + df2$L))
+      df2 <- na.omit(df2)
+      mean_OG=mean(df2$freq)
+      #print(mean_OG)
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- mean_OG
+    } else {
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- "1"
+    }
+      j = j + 1
+  }
+
+  df=data.frame(OG=ortogruppo,mean_freq=media_OG)
+  df$OG <- gsub("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR","",df$OG)
+  df$origin <- k
+  assign(paste("df", k, sep="_"), df)
+}
+
+df <- rbind(`df_free-living`,`df_endosymbiont`)
+df$OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",df$OG)
+df$mean_freq <- as.numeric(df$mean_freq)
+
+#
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+clean <- merge(df,dnds, by="OG")
+clean<-subset(clean, free!="NA")
+clean<-subset(clean, mean_freq!="NA")
+clean<-subset(clean, mean_freq!="NaN")
+clean<-subset(clean, free < 1)
+clean<-subset(clean, endo < 1)
+cog <- read.table("cog.tsv", sep="\t", header = T)
+clean <- left_join(clean, cog, by = "OG")
+clean <- clean %>% separate_rows(cog, sep = '(?<=.)(?=.)')
+cog_conversion <- read.table("cog_conversion.tsv", sep="\t", header = T)
+clean <- left_join(clean, cog_conversion, by = "cog")
+```
+
+<br />
+<br />
+
+##### __Fig. S9f:__
+
+```{r Fig. S9f, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+
+clean <- merge(df,dnds, by = "OG")
+
+colnames(clean) <- c("OG","mean_loss_freq","origin","dnds_free","dnds_endo")
+clean <- spread(clean, key = origin, value = mean_loss_freq)
+colnames(clean) <- c("OG","dnds_free","dnds_endo","mean_loss_freq_endo","mean_loss_freq_free")
+
+clean <- clean[c("OG","dnds_free","mean_loss_freq_endo")]
+
+clean <- subset(clean, mean_loss_freq_endo != "NA")
+clean <- subset(clean, mean_loss_freq_endo != "NaN")
+clean <- subset(clean, dnds_free != "NA")
+clean <- subset(clean, dnds_free != "NaN")
+clean <- subset(clean, dnds_free < 1)
+
+clean <- clean[clean$OG %in% endo,]  
+
+dim(clean) # number of OGs considered in this analysis
+
+FigS9f <- ggplot(clean, aes(x=dnds_free, y=mean_loss_freq_endo)) + 
+  geom_point(size = 4, alpha =.05, pch = 20, color = "orange") + 
+  geom_smooth(method = "lm", se = F, color="black", fullrange = TRUE, linetype = "dashed") +
+  scale_linetype_manual(values ="dashed") +
+  theme_bw() +
+  xlab("dNdS in free-living") + 
+  ylab("mean loss frequency in endosymbionts") +
+  theme(plot.title = element_text(size = 10)) + 
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),panel.background = element_blank()) + 
+  theme(strip.text = element_text(face = "bold", size = rel(0.45)), strip.background = element_rect(fill = "white", colour = "black", size = 1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + theme(plot.title = element_text(size = 10)) + xlim(0,1) + ylim(0,1) +
+  theme(legend.position = "none") + xlim(0,.75) +
+  theme(axis.text.y = element_text(size = 14)) + theme(axis.text.x = element_text(size = 14)) + theme(aspect.ratio = 1)
+
+FigS9f <- FigS9f + stat_cor(method = "spearman", cex = 5)
+```
+
+<br />
+<br />
+
+##### __data wrangling pt. 4b:__
+
+```{r data wrangling pt. 4b, warning=FALSE}
+files <- list.files(pattern=".txt", path="./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/PerFamily_counts/",full.names = T)
+
+tokeep <- read.table("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR4/node_annotation.tsv",sep="\t",header=T)  
+
+names(tokeep)=c("Node","Trait","Origin")
+
+for (k in c("A","B","C","D","E","F1",'F2',"G","H","I","L","M","0")){
+
+  df=data.frame(OG=character(),mean=numeric())
+  ortogruppo = vector()
+  media_OG = vector()
+  j = 1
+  for (i in files) {
+    df2 <- read.table(i, sep = " ", header = T)
+    df2[] <- lapply(df2, gsub, pattern=',', replacement='')
+    df2$speciations. <- as.numeric(df2$speciations.)
+    df2$duplications. <- as.numeric(df2$duplications.)
+    df2$losses. <- as.numeric(df2$losses.)
+    df2$transfers. <- as.numeric(df2$transfers.)
+    OG <- gsub("./PerFamily_counts//","",i)
+    OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_speciesEventCounts.txt","",OG)
+    names(df2)=c("Node","S","D","L","T","P","O")
+    df2 <- merge(df2,tokeep, by="Node")
+    df2 <- subset(df2, Origin == k)
+    if (length(df2$Trait) >= 1) {
+      df2$freq <- (df2$L / (df2$S + df2$L))
+      df2 <- na.omit(df2)
+      mean_OG=mean(df2$freq)
+      #print(mean_OG)
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- mean_OG
+    } else {
+      ortogruppo[[j]] <- OG
+      media_OG[[j]] <- "1"
+    }
+    j = j + 1
+  }
+
+  df=data.frame(OG=ortogruppo,mean_freq=media_OG)
+  df$OG <- gsub("./DLT_analyses_concatenation_all_genes_site_heterogeneous_SR","",df$OG)
+  df$origin <- k
+  assign(paste("df", k, sep="_"), df)
+}
+
+df <- rbind(df_A,df_B,df_C,df_D,df_E,df_F1,df_F2,df_G,df_H,df_I,df_L,df_M,df_0)
+df$OG <- gsub("_ol_fa_mafft_gappyout_NoSp_Renamed_ACGT_speciesEventCounts.txt","",df$OG)
+
+```
+
+<br />
+<br />
+
+##### __Fig. S9g:__
+
+```{r Fig. S9g, message=FALSE, warning=FALSE}
+
+dnds <- read.table("dnds_total.tsv", sep="\t", header = T)
+clean <- merge(df,dnds, by="OG")
+clean <- subset(clean, dnds != "NA")
+clean <- subset(clean, mean_freq != "NA")
+clean <- subset(clean, mean_freq != "NaN")
+clean <- subset(clean, free != "NaN")
+clean <- subset(clean, endo != "NaN")
+
+cog <- read.table("cog.tsv", sep="\t", header = T)
+clean_endo <- left_join(clean, cog, by = "OG")
+
+clean_endo <- subset(clean_endo, cog != "NA")
+clean_endo <- subset(clean_endo, cog != "-")
+
+clean_endo <- clean_endo %>%separate_rows(cog, sep = '(?<=.)(?=.)')
+
+clean_endo <- subset(clean_endo, cog != "A")
+clean_endo <- subset(clean_endo, cog != "B")
+clean_endo <- subset(clean_endo, cog != "W")
+clean_endo <- subset(clean_endo, cog != "Z")
+
+clean_endo <- left_join(clean_endo, cog_conversion, by = "cog")
+
+clean_endo$mean_freq <- as.numeric(clean_endo$mean_freq)
+
+clean_endo <- clean_endo[clean_endo$OG %in% endo,]  
+
+A <- subset(clean_endo, origin == "A" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+A$rank <- rownames(A)
+A$origin <- "A"
+
+B <- subset(clean_endo, origin == "B" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+B$rank <- rownames(B)
+B$origin <- "B"
+
+C <- subset(clean_endo, origin == "C" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+C$rank <- rownames(C)
+C$origin <- "C"
+
+D <- subset(clean_endo, origin == "D" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+D$rank <- rownames(D)
+D$origin <- "D"
+
+E1 <- subset(clean_endo, origin == "E1" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+E1$rank <- rownames(E1)
+E1$origin <- "E1"
+
+E2 <- subset(clean_endo, origin == "E2" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+E2$rank <- rownames(E2)
+E2$origin <- "E2"
+
+effe <- subset(clean_endo, origin == "F" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+effe$rank <- rownames(effe)
+effe$origin <- "effe"
+
+G <- subset(clean_endo, origin == "G" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+G$rank <- rownames(G)
+G$origin <- "G"
+
+H <- subset(clean_endo, origin == "H" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+H$rank <- rownames(H)
+H$origin <- "H"
+
+I <- subset(clean_endo, origin == "I" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+I$rank <- rownames(I)
+I$origin <- "I"
+
+L <- subset(clean_endo, origin == "L" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+L$rank <- rownames(L)
+L$origin <- "L"
+
+zero <- subset(clean_endo, origin == "0" ) %>%
+  group_by(description) %>%
+  summarise_at(vars(mean_freq), list(freq = mean)) %>% 
+  arrange(freq)
+zero$rank <- rownames(zero)
+zero$origin <- "zero"
+
+loss_freq <- dplyr::bind_rows(A,B,C,D,E1,E2,effe,G,H,I,L,zero)
+loss_freq$freq <- as.numeric(loss_freq$freq)
+loss_freq$rank <- as.numeric(loss_freq$rank)
+
+loss_freq$origin[loss_freq$origin == "effe"] <- "F"
+loss_freq$origin[loss_freq$origin == "zero"] <- "free"
+
+loss_freq <- loss_freq %>%  mutate(mycolor = ifelse(origin == "free", "#c0ecf5", "orange"))
+
+order <- aggregate(rank~description,loss_freq,sum)
+order <- order[order(order$rank),]$description
+
+FigS9g <- ggplot(loss_freq, aes(x = factor(description, order), y=(as.numeric(rank)), label=origin, fill=mycolor)) + 
+  geom_point() + 
+  geom_label_repel(max.overlaps = Inf, min.segment.length = 0) + scale_fill_identity(c("#c0ecf5", "orange")) +
+  theme_bw() + 
+  #coord_flip() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  xlab("") + ylab("") + theme(legend.position = "none") +
+  theme(axis.text.y = element_text(size = 12)) + theme(axis.text.x = element_text(size = 12)) +
+  theme(panel.grid.minor = element_blank(),panel.background = element_blank()) +
+  labs(y = "mean loss frequency ranks")
+```
+
+<br />
+<br />
+
+##### __Fig. S9e:__
+
+```{r Fig. S9e, fig.width=6, fig.height=6, message=FALSE, warning=FALSE}
+
+df_cor <- data.frame(clean_endo[,c(-4,-5,-6,-7,-8,-9)])
+df_cor <- reshape(df_cor, idvar = "OG", timevar = "origin", direction = "wide")
+row.names(df_cor) <- df_cor$OG
+df_cor <- df_cor[,c(-1)]
+
+new_order <-  sort(colnames(df_cor),decreasing=F)
+df_cor <- df_cor[, new_order]
+
+colnames(df_cor) <- c("free-living","A","B","C","D","E","F1","F2","G","H","I","L","M")
+my.palette <- get_palette(c("white", "white", "orange"), 10)
+cor.test <- df_cor %>% cor_test(method = "spearman", use='pairwise.complete.obs')
+cor.test$p <- p.adjust(cor.test$p, method = "hochberg", n = length(cor.test$p))
+cor.mat <- as_cor_mat(cor.test)
+p.mat <- cor_pmat(df_cor)
+
+FigS9e <- ggcorrplot(cor.mat, p.mat = p.mat, sig.level = 0.001, hc.order = F, type = "lower", outline.col = "white", ggtheme = ggplot2::theme_bw,
+           colors = c("white", "white", "orange"),method = "circle") + 
+  theme(axis.text.y = element_text(size = 14)) + theme(axis.text.x = element_text(size = 14)) + theme(legend.position = "none") 
+```     
+
+<br />
+<br />
+
+##### __wrapping up Fig. S9 - topology sensitivity test:__
+
+```{r Fig. S9, fig.width=12, fig.height=16, warning=FALSE}
+
+FigS9tmp <- (FigS9a | FigS9b | FigS9c) /
+            (FigS9d | FigS9e | FigS9f) /
+                      FigS9g
+
+FigS9 <- FigS9tmp + plot_annotation(tag_levels = 'A')
+
+ggsave("FigS9.pdf", FigS9, width = 12, height = 16)
+
+FigS9
+```
+
+<br />
+<br />
+
+##### __wrapping up - save workspace:__
+
+```{r save, warning=FALSE, eval = TRUE}
+save.image(file="workspace.RData") 
+```
