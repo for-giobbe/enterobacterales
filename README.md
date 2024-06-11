@@ -1,4 +1,4 @@
-#### repo for the manuscript:
+#### code repo for the manuscript:
 
 
 #### "Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis"
