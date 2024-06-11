@@ -1,14 +1,16 @@
+# Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis.
 
-#### title: "Parallel dynamics of gene content evolution across independent endosymbiont lineages."
+<br />
+<br />
 
 #### authors:
   - Giobbe Forni
   - Jacopo Martelossi
   - Dario Pistone
-  - Benoit Morell
+  - Benoit Morel
   - Claudio Bandi
   - Matteo Montagna
-  
+ 
 #### date: "`r format(Sys.time(), '%d %B %Y')`"
 
 ```{r setup, include=FALSE}
@@ -18,7 +20,7 @@ knitr::opts_chunk$set(echo = TRUE)
 <br />
 <br />
 
-# __BACKGROUND:__
+# __0 - BACKGROUND:__
 
 Abstract: The establishment of symbiosis dramatically alters the evolution of the associated species, making symbiotic systems ideal models for studying the impact of lifestyle changes on genomes. Here, we focused on Enterobacterales, a large and ancient bacterial lineage that includes endosymbionts with diverse host associations, ranging from gut inhabitants to intracellular environments, and from horizontal to vertical transmission. Leveraging over two hundred genomes, along with cutting-edge single-copy gene concatenation and multi-copy gene family approaches, we inferred a robust phylogenetic framework that supports eleven independent transitions to endosymbiosis. Inferences on patterns of genome evolution confirm previous hypotheses about the processes underlying genome reduction: a substantial spike in gene loss always occurs simultaneously with the establishment of endosymbiosis, while a reduction in gene acquisition mechanisms is associated with the subsequent genome erosion. Furthermore, gene family loss frequencies were correlated across independent endosymbiotic clades; genes with more conserved functions and stronger constraints on sequence evolution are lost less frequently, suggesting that differences in gene essentiality and dispensability drive the observed parallelism. Our analyses contribute to the coming of age of the theory of genome evolution in symbiotic associations and provide novel insights into the importance of recombination as an opposing force against genome erosion.
 
@@ -55,7 +57,7 @@ iqtree2 -s min95%sp_p.ol.RS4.good_part.aln -m TEST -mset JC,F81,GTR -mdef SR4_pr
 
 ##### __code for gene families tree inferences:__
 
-We build up gene families trees for each OG using two different dataset and the ParGene pipeline: (i) aa sequences for all gene families, (ii) SR4-recoded aa sequences for all gene families. the "$Aln_dir" point to the directory were are stored original alignments and the recoded ones. "$out" is the out directory.
+We built up gene families trees for each OG using two different dataset and the ParGene pipeline: (1) aa sequences for all gene families, (2) SR4-recoded aa sequences for all gene families. the "$Aln_dir" point to the directory were are stored original alignments and the recoded ones. "$out" is the out directory.
 
 ```{gene families trees inferences, eval = FALSE}
 pargenes.py -a "$Aln_dir" -o "$out" -c 16 -d aa -m --modeltest-criteria BIC --modeltest-perjob-cores 4
@@ -66,7 +68,7 @@ pargenes.py -a "$Aln_dir" -o "$out" -c 16 -d aa -m --modeltest-criteria BIC --mo
 
 ##### __code for gene families-based species tree inferences:__
 
-We performed three gene families based tree inferences (i) all gene families (aa alignments and trees); (ii) gene families that pass the iqtree stationary/homogeneity test (aa alignments and trees) and (iii) all gene families but SR4-recoded (SR4-recoded alignments and trees). The GeneRax comand was the same for all analyses changing only the family file ("$Family_file" variable).
+We performed three gene families based tree inferences (1) all gene families (aa alignments and trees); (2) gene families that pass the iqtree stationary/homogeneity test (aa alignments and trees) and (3) all gene families but SR4-recoded (SR4-recoded alignments and trees). The GeneRax comand was the same for all analyses changing only the family file ("$Family_file" variable).
 
 ```{gene families based species tree inferences, eval = FALSE}
 generax --families "$Family_file" --si-strategy HYBRID --species-tree MiniNJ --rec-model UndatedDTL --per-family-rates --prune-species-tree --si-estimate-bl --si-quartet-support --prefix "$out"
@@ -126,14 +128,14 @@ library(patchwork)
 
 # __2 - TOPOLOGY ANALYSES:__
 
-Here we compare the topologies we found
+Here we compare all the Enterobacterales topologies we found.
 
 <br />
 <br />
 
 ##### __import data pt. 1:__
 
-Here we import the different phylogenetic inferences along with the tips tratis:
+We start by importing the different phylogenetic inferences along with the tips tratis:
 
 ```{r import data pt. 1}
 concat_all_hom_aa <- read.tree("phylogenetic_resolutions/concatenation_all_genes_site_homogeneous_aa.nwk")
@@ -984,6 +986,32 @@ Fig4c
 <br />
 <br />
 
+##### __code for dNdS inferences:__
+
+Nucleotide OGs were reconstructed from amino acids OGs and subsequently splitted in endosymbiont and free-living. Subsequently alignment was performed using a custom script and trimmining was carried out using trimal; genetrees were inferred using the pargenes pipeline. 
+Here, "$genefam_AA" point to the directory where the OGs analyzed previously using Generax are found,
+while "$genefam_NT" points to the  directory where the OGs used for dNdS will be found. Instead, "$genomes_CDS_NT" points to the directory were each genome coding sequences are found. Finally, codeml was run using the alignement and associated genetree file. 
+
+```{dNdS inferences, eval = FALSE}
+
+for j in "$genefam_AA"; do for i in $(grep ">" $j); do sp=$(echo $i | awk -F "%" '{print $1}' | tr -d ">" |  awk -F "." '{print $1}'); gene=$(echo $i | awk -F "%" '{print $3}' | awk -F "_" 'NF{NF-=1};1' | sed 's/ /_/g'); grep -A 1 $gene "$genomes_CDS_NT"/$sp* >> "$genefam_NT"/${j::-14}.clean.nt; done; done
+
+for i in *.clean.nt; do for j in $(grep $'\tN\t' sp_annotations | awk '{print $1}'); do grep -A 1 $j $i >> ${i::-3}.free.clean.nt; done; done
+
+for i in *.clean.nt; do for j in $(grep $'\tE\t' sp_annotations | awk '{print $1}'); do grep -A 1 $j $i >> ${i::-3}.endo.clean.nt; done; done
+
+sh msa_align.sh -i input_ogs -f output_aln
+
+for i in *.aln; do trimal -in "$i" -out "$i".gappyout -gappyout; done 
+
+for i in *gappyout; do trimal -in "$i" -out "$i"_NoSp -resoverlap 0.6 -seqoverlap 50; done
+
+pargenes.py -a alignements -o output -d nt --use-modeltest
+```
+
+<br />
+<br />
+
 ##### __Fig. S8a - families mean loss frequency and free-living selective regime - boxplot:__
 
 ```{r Fig. S8a, fig.width=12, fig.height=6, message=FALSE, warning=FALSE}
@@ -1388,55 +1416,6 @@ FigS8 <- plot_grid(FigS8a,FigS8b,
 ggsave("FigS8.pdf", FigS8, width = 12, height = 6)
 
 FigS8
-```
-
-<br />
-<br />
-
-##### __DNA repair genes__
-
-```{r DNA repair genes, fig.width=12, fig.height=6, message=FALSE, warning=FALSE, eval = FALSE}
-
-clean <- merge(df,dnds, by="OG")
-repair_genes <- read.table("DNA_repair_annotations.tsv", sep="\t",header=T)
-tmp <- clean[clean$OG %in% repair_genes$OG, ]
-tmp <- reshape(tmp, idvar = "OG", timevar = "origin", direction = "wide")
-tmp <- tmp[,c(1:5)]
-tmp <- merge(tmp, repair_genes, by="OG")
-colnames(tmp) <- c("OG", "loss_F","dnds_F","dnds_E","loss_E", "gene")
-repair_genes <- tmp[, c(1, 6, 2, 5, 3, 4)]
-
-repair_genes
-
-repair_genes$loss_F <- as.numeric(repair_genes$loss_F)
-repair_genes$loss_E <- as.numeric(repair_genes$loss_E)
-repair_genes$dnds_F <- as.numeric(repair_genes$dnds_F)
-repair_genes$dnds_E <- as.numeric(repair_genes$dnds_E)
-repair_genes <- na.omit(repair_genes)
-  
-# is the omega of specific DNA repair genes statistically higher than genes in the category "Replication, recombination and repair"??!
-ks.test(
-  repair_genes$dnds_E,
-  cog_clean$endo[cog_clean$description == "Replication, recombination and repair"],
-  alternative = "greater")
-
-# is the omega of genes in "Replication, recombination and repair" statistically higher than all other genes??!
-ks.test(
-  cog_clean$endo[cog_clean$description == "Replication, recombination and repair"],
-  cog_clean$endo[cog_clean$description != "Replication, recombination and repair"],
-  alternative = "greater")
-
-# is the loss frquency of specific DNA repair genes statistically higher than genes in the category "Replication, recombination and repair"??!
-ks.test(
-  repair_genes$loss_E,
-  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description == "Replication, recombination and repair"], 
-  alternative = "greater")
-
-# is the loss frquency of genes in "Replication, recombination and repair" statistically higher than all other genes??!
-ks.test(
-  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description == "Replication, recombination and repair"],
-  cog_clean$mean_freq[cog_clean$origin == "endosymbiont" & cog_clean$description != "Replication, recombination and repair"],
-  alternative = "greater")
 ```
 
 <br />
@@ -2114,6 +2093,6 @@ FigS9
 
 ##### __wrapping up - save workspace:__
 
-```{r save, warning=FALSE, eval = TRUE}
+```{r save, warning=FALSE, eval = FALSE}
 save.image(file="workspace.RData") 
 ```
