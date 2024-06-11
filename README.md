@@ -1,7 +1,7 @@
 #### code repo for the manuscript:
 
 
-#### "Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis"
+#### _"Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis"_
 
 
 ![alt text](https://upload.wikimedia.org/wikipedia/commons/7/7c/Journal.pbio.0050126.g001.png)
@@ -19,9 +19,9 @@ Our analyses contribute to the coming of age of the theory of genome evolution i
 ---
 
 
-In this repo there are two files which will guide others throughout analyses.
+In this repo there are two files which will guide others throughout analyses_
 
-- a [knitted](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.html) markdown file - more acessible
-- a [unknitted](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.Rmd) markdown file - to rerun analyses
+- a [intellegible .html](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.html) markdown file - more acessible
+- a [nonknitted mardown](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.Rmd) markdown file - to rerun analyses
 
 Furthermore, a [zenodo]() repository is available for large intermediate files.
