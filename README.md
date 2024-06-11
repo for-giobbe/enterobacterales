@@ -1,15 +1,8 @@
-#### repo for the manuscript 
+#### repo for the manuscript:
 
 
 ## Parallel dynamics of bacterial genome reduction across independent transitions to endosymbiosis.
 
-
-- Giobbe Forni
-- Jacopo Martelossi
-- Benoit Morel
-- Dario Pistone
-- Claudio Bandi
-- Matteo Montagna
 
 
 ![alt text](https://www.researchgate.net/publication/340411951/figure/fig3/AS:960059660054533@1605907468823/Transmission-electron-microphotograph-of-the-Pantoea-ananatis-strain-NN08200.jpg)
