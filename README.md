@@ -24,6 +24,6 @@ Our analyses contribute to the coming of age of the theory of genome evolution i
 
 In this repo there is a [knitted html R markdown](https://htmlpreview.github.io/?https://raw.githubusercontent.com/for-giobbe/enterobacterales/main/markdown.html) which makes possible to follow the manuscript analyses.
 
-The same R markdown - alongside large files - can be found within a [zenodo](10.5281/zenodo.11611737) repository and it can be used to fully and seamlessly reproduce the manuscript analyeses. To do so, unzip the folder and use [knitr](https://yihui.org/knitr/) on the ```markdown.rmd``` file!
+The same R markdown - alongside large files - can be found within a [zenodo](https://zenodo.org/records/11611738) repository and it can be used to fully and seamlessly reproduce the manuscript analyeses. To do so, unzip the folder and use [knitr](https://yihui.org/knitr/) on the ```markdown.rmd``` file!
 
 
